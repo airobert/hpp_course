@@ -40,6 +40,7 @@ class Agent (Parent):
 		print 'degree of freedom:\t', self.getNumberDof()
 		print 'mass of the robot:\t', self.getMass()
 		print 'the center of mass:\t', self.getCenterOfMass()
+		config = self.getCurrentConfig()
 		nm = self.getJointNames()
 		print 'there are ', len(nm), 'joint names in total. They are:'
 		for i in range(len(nm)):
@@ -47,6 +48,12 @@ class Agent (Parent):
 			upper = self.getJointBounds(nm[i])[1]
 			print 'joint name: ', nm[i], '\trank in configuration:', self.rankInConfiguration[nm[i]],
 			print '\tlower bound: {0:.3f}'.format(lower), '\tupper bound: {0:.3f}'.format(upper) 
+
+		for i in range(len(nm)):
+			lower = self.getJointBounds(nm[i])[0]
+			upper = self.getJointBounds(nm[i])[1]
+			print nm[i], ' & ', self.rankInConfiguration[nm[i]],
+			print '& {0:.3f}'.format(lower), '& {0:.3f} & '.format(upper), '{0:.3f}\\\\ \\hline'.format(config[i]) 
 
 		print 'by default, the root joint position is at:', self.getRootJointPosition()
 		print 'the default configuration is: ', self.getCurrentConfig()
