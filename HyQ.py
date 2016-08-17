@@ -13,7 +13,7 @@ class HyQ (Agent):
 		Agent.__init__(self, platform, agentIndex, agentName, "hyq")
 		# self.set_init(0, 0)
 
-	def set_init(self, x, y):
+	def setInit(self, x, y):
 		print 'the agent is now set to its initial configuration at (', x, ', ', y, ')'
 		self.init_config = self.getCurrentConfig()
 		self.init_config[0] = x

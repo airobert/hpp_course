@@ -3,7 +3,7 @@ import sys
 from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver import ProblemSolver
 from hpp.gepetto import ViewerFactory
-
+from hpp.corbaserver.pr2 import Robot as PR2Robot
 
 class Agent (Parent):
 	platform = None
@@ -12,15 +12,18 @@ class Agent (Parent):
 	robotType = ""
 	packageName = ""
 	meshPackageName = ""
-	rootJointType = ""
+	rootJointType = "planar"
 	urdfName = ""
 	urdfSuffix = ""
 	srdfSuffix = ""
 	ps = None
 	# vf = None
+	start_config = []
+	end_config = []
 	init_config = []
 	goal_config = []
-	obs = []
+	obs = [] # a list of other agents as obstacles
+	env = None # the environment
 
 
 	def __init__ (self, platform, agentIndex, agentName, robotType, load = True):
@@ -31,6 +34,9 @@ class Agent (Parent):
 		Parent.__init__ (self, agentName, self.rootJointType, load)
 		self.ps = ProblemSolver (self)
 		self.print_information()
+		self.robotType = robotType
+		
+
 	
 	def print_information(self):
 		print '-------------------------------------------'
@@ -49,11 +55,11 @@ class Agent (Parent):
 			print 'joint name: ', nm[i], '\trank in configuration:', self.rankInConfiguration[nm[i]],
 			print '\tlower bound: {0:.3f}'.format(lower), '\tupper bound: {0:.3f}'.format(upper) 
 
-		for i in range(len(nm)):
-			lower = self.getJointBounds(nm[i])[0]
-			upper = self.getJointBounds(nm[i])[1]
-			print nm[i], ' & ', self.rankInConfiguration[nm[i]],
-			print '& {0:.3f}'.format(lower), '& {0:.3f} & '.format(upper), '{0:.3f}\\\\ \\hline'.format(config[i]) 
+		# for i in range(len(nm)):
+		# 	lower = self.getJointBounds(nm[i])[0]
+		# 	upper = self.getJointBounds(nm[i])[1]
+		# 	print nm[i], ' & ', self.rankInConfiguration[nm[i]],
+		# 	print '& {0:.3f}'.format(lower), '& {0:.3f} & '.format(upper), '{0:.3f}\\\\ \\hline'.format(config[i]) 
 
 		print 'by default, the root joint position is at:', self.getRootJointPosition()
 		print 'the default configuration is: ', self.getCurrentConfig()
@@ -63,19 +69,53 @@ class Agent (Parent):
 			print 'but this default configuration is not valid because:'
 			print self.isConfigValid(self.getCurrentConfig())[1]
 
-	
-	def activate_agent():
-		self.platform.main_agent.client.problem.selectProblem(self.index)
+	def refrechAgent(self):
+		agt = PR2(self.platform, self.index, self.name)
+		self = agt
+		print 'the agent ', self.index, ' is now refreshed in this problem' 
+
+	def activateAgent(self):
+		self.platform.main_agent.client.problem.selectProblem(str(self.index))
+		self.refrechAgent()
 		print 'the agent ', self.index , ' is now activated'
 
-	def registerObstacle(obs):
+	def registerObstacle(self, obs):
 		print 'load obstacle'
 		self.client.obstacle.loadObstacleModel(obs.packageName, obs.urdfName, obs.name)
 
 		# self.vf.loadObstacleModel ("hpp_tutorial", "bigbox", "bb")
-		self.flatform.refresh_display()
+		self.flatform.refreshDisplay()
 
-	def moveObstacle(obs, config):
+
+	def setEnvironment(self, env):
+		self.client.obstacle.loadObstacleModel(env.packageName, env.urdfName, env.name)
+
+	def moveObstacle(self, obs, config):
 		obs.config = config
 		self.client.obstacle.moveObstacle(obs.baseJointName, obs.config)
-		self.flatform.refresh_display()
+		self.flatform.refreshDisplay()
+
+	def setInitConfig (self, config):
+		self.ps.setInitialConfig(config)
+		self.init_config = config
+
+	def setGoalConfig (self, config):
+		self.ps.addGoalConfig(config)
+		self.goal_config = config
+
+	def solve(self):
+		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
+		self.ps.addPathOptimizer ("RandomShortcut")
+		print self.ps.solve()
+
+	def playPath(self):
+		self.platform.playAgentPath(self.client)
+
+
+class PR2 (PR2Robot, Agent):
+	def __init__(self, platform, agentIndex, agentName):
+		print 'initialising a PR2 agent'
+		Agent.__init__(self, platform, agentIndex, agentName, "pr2")
+
+	def set_init(self, x, y):
+		print 'the agent is now set to its initial configuration at (', x, ', ', y, ')'
