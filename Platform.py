@@ -3,7 +3,7 @@
 # -DCMAKE_INSTALL_PREFIX=/home/airobert/HPP/install
 
 from HyQ import HyQ
-from PR2 import PR2
+from Agent import PR2
 from Environment import BasicHouse
 from Obstacle import Obstacle
 from hpp.corbaserver import ProblemSolver
@@ -21,6 +21,7 @@ class Platform ():
 	vf = None
 	# viewer
 	r = None
+	env = None
 	# pp = PathPlayer (rbprmBuilder.client.basic,ls r)
 	def __init__(self, mainAgentType):
 		print 'creating a platform with an agent of type: ', mainAgentType
@@ -37,12 +38,13 @@ class Platform ():
 		self.agents.append (self.main_agent)
 		
 	def refreshDisplay(self):
-		self.r.computeObjectPosition()
 		self.r = self.vf.createViewer()
+		self.r.computeObjectPosition()
 
 		#and finally, set the environment
 	def setEnvironment(self, env):
 		self.vf.loadObstacleModel(env.packageName, env.urdfName, env.name)
+		self.env = env
 		self.refreshDisplay()
 
 	
@@ -51,6 +53,10 @@ class Platform ():
 		for i in self.agents:
 			i.refrechAgent()
 
+	def loadAgentView (self, index):
+		self.vf = ViewerFactory (self.agents[index -1].ps)
+		self.refreshDisplay()
+		self.r(self.agents[index - 1].init_config)
 
 	def playAgentPath(self, cl):
 		self.pp = PathPlayer (cl, self.r)

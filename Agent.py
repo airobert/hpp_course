@@ -17,16 +17,17 @@ class Agent (Parent):
 	urdfSuffix = ""
 	srdfSuffix = ""
 	ps = None
-	# vf = None
+	vf = None
 	start_config = []
 	end_config = []
 	init_config = []
 	goal_config = []
-	obs = [] # a list of other agents as obstacles
-	env = None # the environment
+	# obs = [] # a list of other agents as obstacles
+	# env = None # the environment
 
 
 	def __init__ (self, platform, agentIndex, agentName, robotType, load = True):
+		self.repeat = 0
 		# print 'creating an agent of type ', robotType 
 		self.platform = platform
 		self.index = agentIndex
@@ -75,7 +76,7 @@ class Agent (Parent):
 		print 'the agent ', self.index, ' is now refreshed in this problem' 
 
 	def activateAgent(self):
-		self.platform.main_agent.client.problem.selectProblem(str(self.index))
+		self.platform.main_agent.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
 		self.refrechAgent()
 		print 'the agent ', self.index , ' is now activated'
 
@@ -90,7 +91,7 @@ class Agent (Parent):
 	def setEnvironment(self, env):
 		self.client.obstacle.loadObstacleModel(env.packageName, env.urdfName, env.name)
 
-	def moveObstacle(self, obs, config):
+	def relocateObstacle(self, obs, config):
 		obs.config = config
 		self.client.obstacle.moveObstacle(obs.baseJointName, obs.config)
 		self.flatform.refreshDisplay()
@@ -107,10 +108,15 @@ class Agent (Parent):
 		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
 		self.ps.addPathOptimizer ("RandomShortcut")
 		print self.ps.solve()
+		self.repeat += 1
 
 	def playPath(self):
 		self.platform.playAgentPath(self.client)
 
+	def loadOtherAgents(self): # load other agents as obstacles
+		for a in self.platform.agents:
+			if a.index != self.index:
+				self.client.obstacle.loadObstacleModel(a.packageName, a.urdfName, a.name)
 
 class PR2 (PR2Robot, Agent):
 	def __init__(self, platform, agentIndex, agentName):
