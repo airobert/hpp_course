@@ -1,17 +1,24 @@
 # gepetto-viewer-server
-# hppcorbaserver
+# not hppcorbaserver
+# hpp-manipulation-server
 # -DCMAKE_INSTALL_PREFIX=/home/airobert/HPP/install
+
 
 from HyQ import HyQ
 from Agent import PR2
 from Environment import BasicHouse
 from Obstacle import Obstacle
 from hpp.corbaserver import ProblemSolver
-from hpp.gepetto import ViewerFactory
+# from hpp.corbaserver.manipulation import ProblemSolver as MProblemSolver, ConstraintGraph
 from hpp.gepetto import PathPlayer
+from hpp.gepetto import ViewerFactory
+# from hpp.gepetto.manipulation import ViewerFactory as MViewerFactory
+from hpp.corbaserver.manipulation import robot as METARobot
+
 
 class Platform ():
 	main_agent = None
+	meta_agent = None
 	agents = []
 	# problem solver
 	ps = None
@@ -38,14 +45,15 @@ class Platform ():
 		self.agents.append (self.main_agent)
 		
 	def refreshDisplay(self):
-		self.r = self.vf.createViewer()
+	# 	self.r = self.vf.createViewer()
 		self.r.computeObjectPosition()
 
 		#and finally, set the environment
 	def setEnvironment(self, env):
 		self.vf.loadObstacleModel(env.packageName, env.urdfName, env.name)
 		self.env = env
-		self.refreshDisplay()
+		self.r = self.vf.createViewer()
+		# self.refreshDisplay()
 
 	# this method looks useless so far.....
 	def activatePlatform(self):
@@ -55,8 +63,12 @@ class Platform ():
 
 	def loadAgentView (self, index):
 		self.vf = ViewerFactory (self.agents[index -1].ps)
-		self.refreshDisplay()
+		self.r = self.vf.createViewer()
+		# print '---------------->', len(self.agents[index - 1].init_config)
 		self.r(self.agents[index - 1].init_config)
+		self.refreshDisplay()
+		# self.r.computeObjectPosition()
+
 
 	def playAgentPath(self, cl):
 		self.pp = PathPlayer (cl, self.r)

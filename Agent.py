@@ -44,7 +44,7 @@ class Agent (Parent):
 		self.jointBounds[name] = spec
 		self.setJointBounds(name, spec)
 
-	def refrechAgent(self):
+	def refreshAgent(self):
 		agt = None
 		if (self.robotType == 'pr2'):
 			print 'create it again'
@@ -59,12 +59,13 @@ class Agent (Parent):
 		print 'the agent ', self.index, ' is now recreated in this problem' 
 		agt.ps = ProblemSolver(agt)
 		agt.setEnvironment(self.platform.env)
+		agt.loadOtherAgents()
 		self = agt
 		self.print_information()
 
 	def activateAgent(self):
 		self.platform.main_agent.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
-		self.refrechAgent()
+		self.refreshAgent()
 		print 'the agent ', self.index , ' is now activated'
 	
 	def print_information(self):
@@ -104,7 +105,7 @@ class Agent (Parent):
 		self.client.obstacle.loadObstacleModel(obs.packageName, obs.urdfName, obs.name)
 
 		# self.vf.loadObstacleModel ("hpp_tutorial", "bigbox", "bb")
-		self.flatform.refreshDisplay()
+		# self.flatform.refreshDisplay()
 
 
 	def setEnvironment(self, env):
@@ -133,6 +134,7 @@ class Agent (Parent):
 		self.platform.playAgentPath(self.client)
 
 	def loadOtherAgents(self): # load other agents as obstacles
+		print 'load ', len(self.platform.agents) - 1, 'other agents'
 		for a in self.platform.agents:
 			if a.index != self.index:
 				self.client.obstacle.loadObstacleModel(a.packageName, a.urdfName, a.name)
