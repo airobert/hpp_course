@@ -47,7 +47,7 @@ class Platform ():
 		self.env = env
 		self.refreshDisplay()
 
-	
+	# this method looks useless so far.....
 	def activatePlatform(self):
 		self.main_agent.client.problem.selectProblem('0')
 		for i in self.agents:

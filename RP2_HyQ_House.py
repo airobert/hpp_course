@@ -2,16 +2,15 @@ from  Platform import *
 from HyQ import HyQ
 
 pl = Platform("pr2")
-pl.activatePlatform()
+# pl.activatePlatform()
 
 bc = BasicHouse("bc")
 pl.setEnvironment(bc)
-
+ 
 
 agt1 = pl.main_agent
+agt1.setBounds("base_joint_xy", [-10,10,-4,4])
 agt1.activateAgent()
-agt1.setJointBounds("base_joint_xy", [-10,10,-10,10])
-agt1.setEnvironment(bc)
 
 q_init = agt1.getCurrentConfig()
 q_init[0] = -6
@@ -25,44 +24,41 @@ agt1.setGoalConfig(q_goal)
 agt1.solve()
 agt1.platform.loadAgentView(1) # --- works up to here
 # pl.refreshDisplay()
-# agt1.playPath()
+agt1.playPath()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#-------------------------------
+# part 2:  reverse the path
+#-------------------------------
 
 agt1.activateAgent()
-
-agtx = PR2(pl, 1, "twin")
-pl.addAgent(agtx)
-agt1.loadOtherAgents()
-pl.setEnvironment(bc)
+# agt1.setBounds("base_joint_xy", [-10,10,-10,10])
+# agt1.setEnvironment(bc)
 agt1.setInitConfig(q_goal)
 agt1.setGoalConfig(q_init)
-agt1.setJointBounds("base_joint_xy", [-10,10,-10,10])
+agt1.solve()
+agt1.platform.loadAgentView(1) 
+# agt1.platform.loadAgentView(1) # --- works up to here
+# pl.refreshDisplay()
+agt1.playPath()
 
+
+
+
+#-------------------------------
+# part 3:  another agent
+#-------------------------------
+
+agt2 = PR2(pl, 2, "twin")
+pl.addAgent(agt2)
+agt1.activateAgent()
+agt1.loadOtherAgents()
+
+agt1.setInitConfig(q_goal)
+agt1.setGoalConfig(q_init)
 agt1.platform.loadAgentView(1)
 
-
-
-# agt1.platform.loadAgentView(1)
-
-# pl.refreshDisplay()
 agt1.solve()
-
-pl.refreshDisplay()
 agt1.playPath()
 
 

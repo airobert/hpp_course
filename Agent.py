@@ -4,6 +4,7 @@ from hpp.corbaserver.robot import Robot as Parent
 from hpp.corbaserver import ProblemSolver
 from hpp.gepetto import ViewerFactory
 from hpp.corbaserver.pr2 import Robot as PR2Robot
+import copy 
 
 class Agent (Parent):
 	platform = None
@@ -22,22 +23,49 @@ class Agent (Parent):
 	end_config = []
 	init_config = []
 	goal_config = []
+	jointBounds = {}
 	# obs = [] # a list of other agents as obstacles
 	# env = None # the environment
 
 
-	def __init__ (self, platform, agentIndex, agentName, robotType, load = True):
+	def __init__ (self, platform, index, name, robotType, load = True):
 		self.repeat = 0
 		# print 'creating an agent of type ', robotType 
 		self.platform = platform
-		self.index = agentIndex
-		self.name = agentName
-		Parent.__init__ (self, agentName, self.rootJointType, load)
+		self.index = index
+		self.name = name
+		Parent.__init__ (self, name, self.rootJointType, load)
 		self.ps = ProblemSolver (self)
 		self.print_information()
 		self.robotType = robotType
 		
 
+	def setBounds(self, name, spec):
+		self.jointBounds[name] = spec
+		self.setJointBounds(name, spec)
+
+	def refrechAgent(self):
+		agt = None
+		if (self.robotType == 'pr2'):
+			print 'create it again'
+			agt = PR2(self.platform, self.index, self.name)
+		# agt = Agent(self.platform, self.index, self.name, self.robotType)
+		
+		# agt.setEnvironment(self.platform.env)
+
+		for k in self.jointBounds.keys():
+			self.setBounds(k, self.jointBounds[k])
+		# agt.registerObstacle(self.)
+		print 'the agent ', self.index, ' is now recreated in this problem' 
+		agt.ps = ProblemSolver(agt)
+		agt.setEnvironment(self.platform.env)
+		self = agt
+		self.print_information()
+
+	def activateAgent(self):
+		self.platform.main_agent.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
+		self.refrechAgent()
+		print 'the agent ', self.index , ' is now activated'
 	
 	def print_information(self):
 		print '-------------------------------------------'
@@ -70,15 +98,6 @@ class Agent (Parent):
 			print 'but this default configuration is not valid because:'
 			print self.isConfigValid(self.getCurrentConfig())[1]
 
-	def refrechAgent(self):
-		agt = PR2(self.platform, self.index, self.name)
-		self = agt
-		print 'the agent ', self.index, ' is now refreshed in this problem' 
-
-	def activateAgent(self):
-		self.platform.main_agent.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
-		self.refrechAgent()
-		print 'the agent ', self.index , ' is now activated'
 
 	def registerObstacle(self, obs):
 		print 'load obstacle'
@@ -91,10 +110,10 @@ class Agent (Parent):
 	def setEnvironment(self, env):
 		self.client.obstacle.loadObstacleModel(env.packageName, env.urdfName, env.name)
 
-	def relocateObstacle(self, obs, config):
-		obs.config = config
-		self.client.obstacle.moveObstacle(obs.baseJointName, obs.config)
-		self.flatform.refreshDisplay()
+	# def relocateObstacle(self, obs, config):
+	# 	obs.config = config
+	# 	self.client.obstacle.moveObstacle(obs.baseJointName, obs.config)
+	# 	self.flatform.refreshDisplay()
 
 	def setInitConfig (self, config):
 		self.ps.setInitialConfig(config)
