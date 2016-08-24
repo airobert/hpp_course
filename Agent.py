@@ -24,6 +24,8 @@ class Agent (Parent):
 	init_config = []
 	goal_config = []
 	jointBounds = {}
+
+	plan_proposed = []
 	# obs = [] # a list of other agents as obstacles
 	# env = None # the environment
 
@@ -132,6 +134,16 @@ class Agent (Parent):
 
 	def playPath(self):
 		self.platform.playAgentPath(self.client)
+
+	def playProposePath(self):
+		self.platform.payProposePath()
+
+	def storePath(self, choice = 0):
+		# always store the first one for now
+		for p in range(int(round(10 * self.ps.pathLength(choice)))):
+			self.plan_proposed.append(self.ps.configAtParam(choice, p* 1.0 / 10))
+		if self.ps.configAtParam(choice, self.ps.pathLength(choice)) == self.goal_config:
+			self.plan_proposed.append(self.goal_config) 
 
 	def loadOtherAgents(self): # load other agents as obstacles
 		print 'load ', len(self.platform.agents) - 1, 'other agents'

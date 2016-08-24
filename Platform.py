@@ -1,6 +1,6 @@
 # gepetto-viewer-server
-# not hppcorbaserver
-# hpp-manipulation-server
+# not hpp-manipulation-server
+# hppcorbaserver
 # -DCMAKE_INSTALL_PREFIX=/home/airobert/HPP/install
 
 
@@ -72,6 +72,8 @@ class Platform ():
 
 	def playAgentPath(self, cl):
 		self.pp = PathPlayer (cl, self.r)
+		self.pp.setSpeed(4) # comment this out if you are not debugging
+		self.pp.displayPath(0, color = [0.3, 0.7, 0.6, 1], jointName='base_joint_xy')
 		self.pp(0)
 
 	def addAgent(self, agt):

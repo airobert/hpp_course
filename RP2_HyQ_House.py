@@ -1,6 +1,6 @@
 
 from  Platform import *
-from HyQ import HyQ
+# from HyQ import HyQ
 
 pl = Platform("pr2")
 # pl.activatePlatform()
@@ -24,11 +24,35 @@ q_goal[1] = 3
 agt1.setGoalConfig(q_goal)
 agt1.platform.loadAgentView(1) # --- works up to here
 agt1.solve()
-# agt1.playPath()
+# pp = PathPlayer(agt1.client, pl.r)
+# pp.displayPath(0, color = [0.5, 0.6, 0.7, 1], jointName='base_joint_xy')
+agt1.storePath()
+print agt1.propose_plan
+agt1.playPath()
+pl.pp.toFile(0, 'testpath')
 
 
 #-------------------------------
-# part 3:  another agent
+# part 2:  reverse the path
+#-------------------------------
+
+agt1.activateAgent()
+# agt1.setBounds("base_joint_xy", [-10,10,-10,10])
+# agt1.setEnvironment(bc)
+agt1.setInitConfig(q_goal)
+agt1.setGoalConfig(q_init)
+agt1.solve()
+agt1.platform.loadAgentView(1) 
+# agt1.platform.loadAgentView(1) # --- works up to here
+# pl.refreshDisplay()
+agt1.playPath()
+# pl.pp.toFile('testpath')
+# pl.pp.toFileAppend('testpath')
+# pl.pp.getTrajFromFile('testpath')
+
+
+#-------------------------------
+# part 3:  sister and brother 
 #-------------------------------
 
 agt2 = PR2(pl, 2, "sister")
@@ -74,7 +98,52 @@ agt1.solve()
 agt1.playPath()
 
 
+#-------------------------------
+# part 4:  moving sister, brother and I at the same time 
+#-------------------------------
 
+
+agt2 = PR2(pl, 2, "sister")
+# agt2 = HyQ(pl, 2, "side")
+agt2.setBounds("base_joint_xy", [-10,10,-4,4])
+pl.addAgent(agt2)
+q_init = agt2.getCurrentConfig()
+q_init[2] = 0
+q_init[3] = 1
+agt2.setInitConfig(q_init)
+agt2.setGoalConfig(q_init)
+pl.loadAgentView(2)
+
+
+agt3 = PR2(pl, 3, "brother")
+# agt2 = HyQ(pl, 2, "side")
+agt3.setBounds("base_joint_xy", [-10,10,-4,4])
+pl.addAgent(agt3)
+q_init = agt3.getCurrentConfig()
+q_init[0] = -2
+q_init[1] = -3
+q_init[2] = 1
+q_init[3] = 0
+agt3.setInitConfig(q_init)
+agt3.setGoalConfig(q_init)
+pl.loadAgentView(3)
+
+
+agt1.activateAgent()
+pl.loadAgentView(1)
+agt1.platform.loadAgentView(1)
+
+q_init = agt1.getCurrentConfig()
+q_init[0] = -6
+q_init[1] = -3
+agt1.setInitConfig(q_init)
+
+q_goal = q_init[::]
+q_goal[0] = 3
+q_goal[1] = 3
+agt1.setGoalConfig(q_goal)
+agt1.solve()
+agt1.playPath()
 
 
 # pl.refreshDisplay()
@@ -91,22 +160,6 @@ agt1.setGoalConfig(q_init)
 
 agt1.solve()
 agt1.playPath()
-
-#-------------------------------
-# part 2:  reverse the path
-#-------------------------------
-
-agt1.activateAgent()
-# agt1.setBounds("base_joint_xy", [-10,10,-10,10])
-# agt1.setEnvironment(bc)
-agt1.setInitConfig(q_goal)
-agt1.setGoalConfig(q_init)
-agt1.solve()
-agt1.platform.loadAgentView(1) 
-# agt1.platform.loadAgentView(1) # --- works up to here
-# pl.refreshDisplay()
-agt1.playPath()
-
 
 
 
@@ -140,6 +193,7 @@ agt1.solve()
 
 
 # pl.main_agent.loadModel('side', 'planar')
+
 
 # pl.main_agent.client.robot.loadRobotModel("side", "planar", "hyq_description", "hyq", "", "")
 
