@@ -5,6 +5,7 @@ from hpp.corbaserver import ProblemSolver
 from hpp.gepetto import ViewerFactory
 from hpp.corbaserver.pr2 import Robot as PR2Robot
 import copy 
+from math import cos, sin, asin, acos, atan2, pi
 
 class Agent (Parent):
 	platform = None
@@ -150,11 +151,47 @@ class Agent (Parent):
 		for a in self.platform.agents:
 			if a.index != self.index:
 				self.client.obstacle.loadObstacleModel(a.packageName, a.urdfName, a.name)
+				# self.ps.loadObstacleFromUrdf(a.packageName, a.urdfName, a.name)
+				# self.client.obstacle.moveObstacle()
+				pst = a.getRootJointPosition3D()
+				self.setRootJointPosition(pst)
+				# names = self.getAllJointNames()
+				names = a.client.obstacle.getObstacleNames(False, 10000)
+				for n in names:
+					if (n[0:len(a.name)] == a.name):
+					# p = self.getJointPosition(n)
+					# if (a.name + n) in a.jointNames:
+						self.client.obstacle.moveObstacle(n, pst)
+						print 'move', n
+				# pstReverse = a.getRootJointPosition3DReverse()
+				self.setRootJointPosition([0,0,0,1,0,0,0]) # set it back
+				# print '-------------------another agent----------------------------'
+				# # print a.client.obstacle.getObstacleNames(False, 10000)
+				# print a.jointNames
+				# print '==================== this agent ==========================='
+				# print names
+
+
+
+	def getRootJointPosition3D(self):
+		x = self.init_config[0]
+		y = self.init_config[1]
+		th = atan2(self.init_config[3], self.init_config[2]) 
+		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
+		return [x, y, 0, cos(th / 2) , 0, 0, sin(th / 2)]
+
+	def getRootJointPosition3DReverse(self):
+		x = self.init_config[0]
+		y = self.init_config[1]
+		th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
+		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
+		return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
+
 
 class PR2 (PR2Robot, Agent):
 	def __init__(self, platform, agentIndex, agentName):
 		print 'initialising a PR2 agent'
 		Agent.__init__(self, platform, agentIndex, agentName, "pr2")
 
-	def set_init(self, x, y):
-		print 'the agent is now set to its initial configuration at (', x, ', ', y, ')'
+	# def set_init(self, x, y):
+	# 	print 'the agent is now set to its initial configuration at (', x, ', ', y, ')'

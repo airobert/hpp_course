@@ -69,6 +69,20 @@ class Platform ():
 		self.refreshDisplay()
 		# self.r.computeObjectPosition()
 
+	def playAllPath(self):
+		max_time = 0
+		for a in self.agents:
+			if len(a.plan_proposed) > a:
+				a = len(a.plan_proposed)
+		
+		for t in range(max_time):
+			print 'time is ', t
+			for i in range(len(self.agents)):
+				if len(self.agents[i].plan_proposed) > t:
+					self.loadAgentView(i)
+					# and then set the agent to its current configuration
+					self.r(self.agents[i].plan_proposed[t])
+
 
 	def playAgentPath(self, cl):
 		self.pp = PathPlayer (cl, self.r)
