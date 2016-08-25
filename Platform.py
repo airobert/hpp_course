@@ -56,10 +56,10 @@ class Platform ():
 		# self.refreshDisplay()
 
 	# this method looks useless so far.....
-	def activatePlatform(self):
-		self.main_agent.client.problem.selectProblem('0')
-		for i in self.agents:
-			i.refrechAgent()
+	# def activatePlatform(self):
+	# 	self.main_agent.client.problem.selectProblem('0')
+	# 	for i in self.agents:
+	# 		i.refrechAgent()
 
 	def loadAgentView (self, index):
 		self.vf = ViewerFactory (self.agents[index -1].ps)
@@ -72,27 +72,49 @@ class Platform ():
 	def playProposedPath(self, index):
 		self.loadAgentView(index)
 		a = self.agents[index - 1]
-		for t in range (a.proposed_plan_length()):
-			self.r(a.proposed_plan_at_time(t))
+		for t in range (a.proposed_plan_length):
+			self.r(a.configOfProposedPlanAtTime(t))
 			sleep(0.02)
 
 
 	def playAllPath(self):
 		max_time = 0
 		for a in self.agents:
-			if a.proposed_plan_length() > max_time:
-				max_time = a.proposed_plan_length()
+			if a.proposed_plan_length > max_time:
+				max_time = a.proposed_plan_length
 		
 		for t in range(max_time):
 			print 'time is ', t
 			for i in range(len(self.agents)):
 				a = self.agents[i]
-				if  a.proposed_plan_length() > t:
+				if  a.proposed_plan_length > t:
 					print 'agent ', a.index, 
 					self.loadAgentView(i)
 					# and then set the agent to its current configuration
-					self.r(a.proposed_plan_at_time(t))
+					self.r(a.configOfProposedPlanAtTime(t))
 			# sleep(0.003)
+
+
+	def checkAllPath(self):
+		max_time = 0
+		for a in self.agents:
+			if a.proposed_plan_length > max_time:
+				max_time = a.proposed_plan_length
+		
+		for t in range(max_time):
+			print 'time is ', t
+			for i in range(len(self.agents)):
+				a = self.agents[i]
+				if  a.proposed_plan_length > t:
+					print 'agent ', a.index, 
+					self.loadAgentView(i)
+					# and then set the agent to its current configuration
+					self.r(a.configOfProposedPlanAtTime(t))
+					# (result, msg) = a.isConfigValid(a.configOfProposedPlanAtTime(t))
+					# if not result:
+					# return False
+			# sleep(0.003)
+
 
 	def playAgentPath(self, cl):
 		self.pp = PathPlayer (cl, self.r)

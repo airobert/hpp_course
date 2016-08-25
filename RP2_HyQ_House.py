@@ -62,6 +62,11 @@ agt2.solve()
 # agt2.playPath()
 agt2.storePath() 
 
+
+# agt1.checkAlongPath()
+# agt2.checkAlongPath()
+
+
 #play agent path
 # agt1.playProposedPath()
 
@@ -71,7 +76,7 @@ agt3 = PR2(pl, 3, "brother")
 # agt2 = HyQ(pl, 2, "side")
 agt3.setBounds("base_joint_xy", [-10,10,-4,4])
 pl.addAgent(agt3)
-agt2.activateAgent()
+agt3.activateAgent()
 
 q_init = agt3.getCurrentConfig()
 q_init[0] = -2
@@ -88,14 +93,18 @@ pl.loadAgentView(3)
 agt3.solve()
 agt3.storePath()
 
-pl.playAllPath()
+# pl.playAllPath()
 
+# pl.checkAllPath()
 
+agt1.activateAgent()
+agt1.checkAlongPath()
 
+agt2.activateAgent()
+agt2.checkAlongPath()
 
-
-
-
+agt3.activateAgent()
+agt3.checkAlongPath()
 
 
 
