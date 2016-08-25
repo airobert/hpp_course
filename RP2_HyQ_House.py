@@ -24,9 +24,10 @@ q_goal[1] = 3
 agt1.setGoalConfig(q_goal)
 agt1.platform.loadAgentView(1) # --- works up to here
 agt1.solve()
+agt1.storePath()
 # pp = PathPlayer(agt1.client, pl.r)
 # pp.displayPath(0, color = [0.5, 0.6, 0.7, 1], jointName='base_joint_xy')
-agt1.storePath()
+# agt1.storePath()
 # print agt1.propose_plan
 # agt1.playPath()
 # pl.pp.toFile(0, 'testpath')
@@ -57,21 +58,52 @@ pl.loadAgentView(2)
 
 # pl.r(q_goal)
 agt2.solve()
-agt2.playPath()
-agt2.storePath()
 
+# agt2.playPath()
+agt2.storePath() 
 
+#play agent path
+# agt1.playProposedPath()
+
+# pl.playAllPath()
+#===========================================
 agt3 = PR2(pl, 3, "brother")
 # agt2 = HyQ(pl, 2, "side")
 agt3.setBounds("base_joint_xy", [-10,10,-4,4])
 pl.addAgent(agt3)
+agt2.activateAgent()
+
 q_init = agt3.getCurrentConfig()
 q_init[0] = -2
 q_init[1] = -3
+q_goal = q_init[::]
+q_goal[0] = 1.5
+q_goal[1] = 3
 
 agt3.setInitConfig(q_init)
-agt3.setGoalConfig(q_init)
+agt3.setGoalConfig(q_goal)
 pl.loadAgentView(3)
+
+# pl.r(q_goal)
+agt3.solve()
+agt3.storePath()
+
+pl.playAllPath()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 agt1.activateAgent()

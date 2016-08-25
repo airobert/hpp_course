@@ -14,7 +14,7 @@ from hpp.gepetto import PathPlayer
 from hpp.gepetto import ViewerFactory
 # from hpp.gepetto.manipulation import ViewerFactory as MViewerFactory
 from hpp.corbaserver.manipulation import robot as METARobot
-
+from time import sleep
 
 class Platform ():
 	main_agent = None
@@ -65,24 +65,34 @@ class Platform ():
 		self.vf = ViewerFactory (self.agents[index -1].ps)
 		self.r = self.vf.createViewer()
 		# print '---------------->', len(self.agents[index - 1].init_config)
-		self.r(self.agents[index - 1].init_config)
+		# self.r(self.agents[index - 1].init_config)
 		self.refreshDisplay()
 		# self.r.computeObjectPosition()
+
+	def playProposedPath(self, index):
+		self.loadAgentView(index)
+		a = self.agents[index - 1]
+		for t in range (a.proposed_plan_length()):
+			self.r(a.proposed_plan_at_time(t))
+			sleep(0.02)
+
 
 	def playAllPath(self):
 		max_time = 0
 		for a in self.agents:
-			if len(a.plan_proposed) > a:
-				a = len(a.plan_proposed)
+			if a.proposed_plan_length() > max_time:
+				max_time = a.proposed_plan_length()
 		
 		for t in range(max_time):
 			print 'time is ', t
 			for i in range(len(self.agents)):
-				if len(self.agents[i].plan_proposed) > t:
+				a = self.agents[i]
+				if  a.proposed_plan_length() > t:
+					print 'agent ', a.index, 
 					self.loadAgentView(i)
 					# and then set the agent to its current configuration
-					self.r(self.agents[i].plan_proposed[t])
-
+					self.r(a.proposed_plan_at_time(t))
+			# sleep(0.003)
 
 	def playAgentPath(self, cl):
 		self.pp = PathPlayer (cl, self.r)

@@ -6,6 +6,7 @@ from hpp.gepetto import ViewerFactory
 from hpp.corbaserver.pr2 import Robot as PR2Robot
 import copy 
 from math import cos, sin, asin, acos, atan2, pi
+from time import sleep
 
 class Agent (Parent):
 	platform = None
@@ -26,7 +27,7 @@ class Agent (Parent):
 	goal_config = []
 	jointBounds = {}
 
-	plan_proposed = []
+	
 	# obs = [] # a list of other agents as obstacles
 	# env = None # the environment
 
@@ -41,6 +42,7 @@ class Agent (Parent):
 		self.ps = ProblemSolver (self)
 		self.print_information()
 		self.robotType = robotType
+		self.__plan_proposed = []
 		
 
 	def setBounds(self, name, spec):
@@ -127,7 +129,7 @@ class Agent (Parent):
 		self.ps.addGoalConfig(config)
 		self.goal_config = config
 
-	def solve(self):
+	def solve(self, choice = 0):
 		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
 		self.ps.addPathOptimizer ("RandomShortcut")
 		print self.ps.solve()
@@ -136,15 +138,28 @@ class Agent (Parent):
 	def playPath(self):
 		self.platform.playAgentPath(self.client)
 
-	def playProposePath(self):
-		self.platform.payProposePath()
+	def playProposedPath(self):
+		self.platform.playProposedPath(self.index)
 
 	def storePath(self, choice = 0):
 		# always store the first one for now
 		for p in range(int(round(10 * self.ps.pathLength(choice)))):
-			self.plan_proposed.append(self.ps.configAtParam(choice, p* 1.0 / 10))
+			print 'this is agent: ', self.index
+			self.platform.agents[self.index - 1].__plan_proposed.append(self.ps.configAtParam(choice, p* 1.0 / 10))
+			# self.platform.r(self.__plan_proposed[-1])
+			sleep(0.02)
+			for a in self.platform.agents:
+				print 'agt', a.index, ': ', len(a.__plan_proposed)
+
 		if self.ps.configAtParam(choice, self.ps.pathLength(choice)) == self.goal_config:
-			self.plan_proposed.append(self.goal_config) 
+			self.__plan_proposed.append(self.goal_config) 
+		print 'plan length: ', len(self.__plan_proposed)
+
+	def proposed_plan_length(self):
+		return len(self.__plan_proposed)
+
+	def proposed_plan_at_time(self, index):
+		return self.__plan_proposed[index]
 
 	def loadOtherAgents(self): # load other agents as obstacles
 		print 'load ', len(self.platform.agents) - 1, 'other agents'
