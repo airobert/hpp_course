@@ -17,9 +17,3 @@ class Obstacle(object):
 	def set_config(self, config):
 		self.config = config
 
-class Box (Obstacle):
-
-	def __init__(self, ):
-		print ''
-
-
