@@ -1,3 +1,7 @@
+# gepetto-viewer-server
+# not hpp-manipulation-server
+# hppcorbaserver
+# -DCMAKE_INSTALL_PREFIX=/home/airobert/HPP/install
 
 from Environment import BasicHouse
 from Obstacle import Obstacle
@@ -68,7 +72,7 @@ class Platform ():
 	def updateViewAtTime(self, t):
 		config = []
 		for a in self.agents:
-			config.append (a.configOfProposedPlanAtTime(t))
+			config.append (a.getConfigOfProposedPlanAtTime(t))
 		self.r(config)
 
 
@@ -87,5 +91,51 @@ class Platform ():
 					# print 'agent ', a.index, 
 					self.loadAgentView(i+1)
 					# and then set the agent to its current configuration
-					self.r(a.configOfProposedPlanAtTime(t))
+					self.r(a.getConfigOfProposedPlanAtTime(t))
 			# sleep(0.003)
+
+	def validateAllPath(self):
+		max_time = 0
+		for a in self.agents:
+			a.startDefaultSolver()
+			a.setBounds()
+			a.setEnvironment()
+			a.loadOtherAgents()
+
+			l = a.getProposedPlanLength()
+			if l > max_time:
+				max_time = l
+
+		for t in range (max_time):
+			print '\n\n\nthis is time ', t
+			for i in range (len(self.agents)):
+				a = self.agents[i]
+				a.startDefaultSolver()
+
+				print 'this is robot ', a.robot.name
+				# a1.obstacle.getObstacleNames(False, 1000)
+				if a.getProposedPlanLength() > t:
+					myconfig = a.getConfigOfProposedPlanAtTime(t)
+					myspec = a.getMoveSpecification(myconfig)
+					print 'the agent is at ', myspec[0], myspec[1]
+					# first of all, move all the obstacles
+					for oa in self.agents: # other agents
+						if a.index != oa.index:
+							# print '\t and moving the ghost of ', oa.robot.name
+							if oa.getProposedPlanLength() > t:
+								config = oa.getConfigOfProposedPlanAtTime(t)
+							else:
+								config = oa.end_config
+							spec = oa.getMoveSpecification(config)
+							a.obstacle.moveObstacle(oa.robot.name + 'base_link_0', spec)
+							print '\tmove ghost', oa.robot.name, ' to ', spec[0], spec[1] 
+
+					# secondly, test if the configuration is valid 
+					(result, _) = a.robot.isConfigValid(a.getConfigOfProposedPlanAtTime(t))
+					if not result:
+						return t
+		# if everything is fine at each time slot, return -1 
+		return -1 
+
+
+

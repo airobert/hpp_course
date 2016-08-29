@@ -69,7 +69,5 @@ a3.solve()
 a3.storePath()
 
 
-pl.playAllPath()
-
-
-
+# pl.playAllPath()
+pl.validateAllPath()

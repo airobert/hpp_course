@@ -81,7 +81,7 @@ class Agent (Client):
 		# the last configuration is the goal configuration
 		if self.ps.configAtParam(choice, self.ps.pathLength(choice)) == self.end_config:
 			self.__plan_proposed.append(self.end_config)
-		print 'plan length: ', len(self.__plan_proposed)
+		print 'stored; plan length: ', len(self.__plan_proposed)
 	
 	def setEnvironment(self):
 		if self.platform.env != None:
@@ -92,12 +92,12 @@ class Agent (Client):
 		print 'There are ', len(self.platform.agents), 'agents'
 		#load ghost agents
 		for a in self.platform.agents:
-			if (a.robot.name != self.robot.name):
+			if (a.index != self.index):
 				# if it is not itself then load a ghost agent
 				g = Ghost()
 				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
-				# and then place it at the location of the agent
-				# TODO
+				# and then place it at the initial location of the agent
+				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
 				config = a.current_config
 				spec = self.getMoveSpecification(config)
 				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
@@ -106,7 +106,7 @@ class Agent (Client):
 		# this is hard-coded for now
 		self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
 
-	def configOfProposedPlanAtTime(self, index):
+	def getConfigOfProposedPlanAtTime(self, index):
 		return self.__plan_proposed[index]
 
 	def getProposedPlanLength(self):
