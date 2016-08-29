@@ -3,9 +3,6 @@
 # hppcorbaserver
 # -DCMAKE_INSTALL_PREFIX=/home/airobert/HPP/install
 
-
-from HyQ import HyQ
-from Agent import PR2
 from Environment import BasicHouse
 from Obstacle import Obstacle
 from hpp.corbaserver import ProblemSolver

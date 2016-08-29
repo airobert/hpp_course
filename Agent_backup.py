@@ -1,6 +1,6 @@
 import sys
 
-from hpp.corbaserver.robot import Robot as Parent
+from hpp.corbaserver.robot import Robot
 from hpp.corbaserver import ProblemSolver
 from hpp.corbaserver import Client
 from hpp.gepetto import ViewerFactory
@@ -9,21 +9,22 @@ import copy
 from math import cos, sin, asin, acos, atan2, pi
 from time import sleep
 
-class Agent (Parent):
+class Agent (Client):
+	robot = None
 	platform = None
 	index = 0
 	name = ""
-	robotType = ""
-	packageName = ""
-	meshPackageName = ""
-	rootJointType = "planar"
-	urdfName = ""
-	urdfSuffix = ""
-	srdfSuffix = ""
+	# packageName = ""
+	# meshPackageName = ""
+	# rootJointType = "planar"
+	# urdfName = ""
+	# urdfSuffix = ""
+	# srdfSuffix = ""
 	ps = None
 	# vf = None
 	start_config = []
 	end_config = []
+	current_config = []
 	init_config = []
 	goal_config = []
 	jointBounds = {}
@@ -34,7 +35,7 @@ class Agent (Parent):
 	# env = None # the environment
 
 
-	def __init__ (self, platform, index, name, robotType, load = True):
+	def __init__ (self, platform, index, name, robot, load = True):
 		self.repeat = 0
 		# print 'creating an agent of type ', robotType 
 		self.platform = platform
