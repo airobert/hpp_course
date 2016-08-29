@@ -21,7 +21,7 @@ class Agent (Parent):
 	urdfSuffix = ""
 	srdfSuffix = ""
 	ps = None
-	vf = None
+	# vf = None
 	start_config = []
 	end_config = []
 	init_config = []
@@ -173,10 +173,15 @@ class Agent (Parent):
 		for a in self.platform.agents:
 			if a.index != self.index:
 				self.client.obstacle.loadObstacleModel(a.packageName, a.urdfName, a.name)
+				# self.platform.vf.loadObstacleModel(a.packageName, a.urdfName, a.name)
 				# self.ps.loadObstacleFromUrdf(a.packageName, a.urdfName, a.name)
 				# self.client.obstacle.moveObstacle()
+				# *************************
+				# this two lines are wrong. becasue of this would only change the location of the robot. 
+				# introducing ghost robots
 				pst = a.getRootJointPosition3D()
 				self.setRootJointPosition(pst)
+				# *************************************
 				# names = self.getAllJointNames()
 				names = a.client.obstacle.getObstacleNames(False, 10000)
 				for n in names:
@@ -227,9 +232,9 @@ class Agent (Parent):
 				return t
 
 			# name = input("go on next?")
-			# if not self.isConfigValid(self.configOfProposedPlanAtTime(t)):
-				# return t
-			#---------------------------------------
+			if not self.isConfigValid(self.configOfProposedPlanAtTime(t)):
+				return t
+			# ---------------------------------------
 			# after checking, we must also move it back !!!!!!!! no need to move back!
 			# getRootJointPosition3DVectorAtTimeReverse(self, t)
 			# for i in range(len(self.platform.agents)):
@@ -255,12 +260,12 @@ class Agent (Parent):
 		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
 		return [x, y, 0, cos(th / 2) , 0, 0, sin(th / 2)]
 
-	# def getMoveVectorFromConfigReverse(self, config):
-	# 	x = self.init_config[0]
-	# 	y = self.init_config[1]
-	# 	th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
-	# 	# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
-	# 	return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
+	def getMoveVectorFromConfigReverse(self, config):
+		x = self.init_config[0]
+		y = self.init_config[1]
+		th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
+		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
+		return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
 
 
 	def getRootJointPosition3DVectorAtTime(self, t):
@@ -272,14 +277,14 @@ class Agent (Parent):
 		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
 		# return [x, y, 0, cos(th / 2) , 0, 0, sin(th / 2)]
 
-	# def getRootJointPosition3DVectorAtTimeReverse(self, t):
-	# 	config = self.configOfProposedPlanAtTime(t)
-	# 	return self.getMoveVectorFromConfigReverse(config)
-	# 	# x = config[0]
-	# 	# y = config[1]
-	# 	# th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
-	# 	# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
-	# 	# return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
+	def getRootJointPosition3DVectorAtTimeReverse(self, t):
+		config = self.configOfProposedPlanAtTime(t)
+		return self.getMoveVectorFromConfigReverse(config)
+		# x = config[0]
+		# y = config[1]
+		# th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
+		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
+		# return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
 
 
 	def getRootJointPosition3D(self): # at time 0
@@ -290,13 +295,13 @@ class Agent (Parent):
 		# # print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
 		# return [x, y, 0, cos(th / 2) , 0, 0, sin(th / 2)]
 
-	# def getRootJointPosition3DReverse(self):
-	# 	return self.getMoveVectorFromConfigReverse(self.init_config)
-	# 	# x = self.init_config[0]
-	# 	# y = self.init_config[1]
-	# 	# th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
-	# 	# # print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
-	# 	# return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
+	def getRootJointPosition3DReverse(self):
+		return self.getMoveVectorFromConfigReverse(self.init_config)
+		# x = self.init_config[0]
+		# y = self.init_config[1]
+		# th = pi/2 + atan2(self.init_config[3], self.init_config[2]) 
+		# # print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
+		# return [x * -1, y * -1, 0, cos(th / 2) , 0, 0, sin(th / 2)]
 
 
 class PR2 (PR2Robot, Agent):

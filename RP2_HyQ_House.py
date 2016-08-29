@@ -9,6 +9,15 @@ bc = BasicHouse("bc")
 pl.setEnvironment(bc)
  
 
+
+pl.vf.loadObstacleModel('hpp_tutorial', 'bigbox', 'bb')
+pl.main_agent.client.obstacle.moveObstacle('bb/base_link_0', [0,2,3,1,0,0,0])
+
+
+pl.refreshDisplay()
+
+
+
 agt1 = pl.main_agent
 agt1.setBounds("base_joint_xy", [-10,10,-4,4])
 agt1.activateAgent()

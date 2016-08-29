@@ -45,7 +45,7 @@ class Platform ():
 		self.agents.append (self.main_agent)
 		
 	def refreshDisplay(self):
-	# 	self.r = self.vf.createViewer()
+		# self.r = self.vf.createViewer()
 		self.r.computeObjectPosition()
 
 		#and finally, set the environment
@@ -62,10 +62,11 @@ class Platform ():
 	# 		i.refrechAgent()
 
 	def loadAgentView (self, index):
-		self.vf = ViewerFactory (self.agents[index -1].ps)
+		self.ps = self.agents[index -1].ps
+		self.vf = ViewerFactory (self.ps)
 		self.r = self.vf.createViewer()
 		# print '---------------->', len(self.agents[index - 1].init_config)
-		# self.r(self.agents[index - 1].init_config)
+		self.r(self.agents[index - 1].init_config)
 		self.refreshDisplay()
 		# self.r.computeObjectPosition()
 
