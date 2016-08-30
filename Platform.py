@@ -32,27 +32,25 @@ class Platform ():
 	index_dic = {}
 
 	#for tree searching
-	tree = None
-	end_node = None
+	tree = None # the root of the three
 	current_node = None
-	iteration = 100
 
 	# pp = PathPlayer (rbprmBuilder.client.basic,ls r)
 	def __init__(self, agents):
 		self.agents = agents
-		init_configs = []
-		end_configs = []
 		for i in range (len(agents)):
 			a = agents[i]
-			init_configs.append(a.start_config)
-			end_configs.append(a.end_config)
 			self.index_dic[agents[i].robot.name] = i
 			self.agents[i].registerPlatform(self, i)
 			print 'the agent ', agents[i].robot.name, ' is now registered with the index ', self.getInidex(agents[i].robot.name) 
-		self.tree = Node (init_configs)
-		self.current_node = tree
-		self.end_node = Node (end_configs)
+		self.tree = self.getStartNode()
+		self.current_node = self.tree
 
+	def getStartNode(self):
+		init_configs = []
+		for a in self.agents:
+			init_configs.append(a.start_config)
+		return Node(init_configs)
 
 	def start(self):
 		# self.problem.selectProblem(0)
@@ -91,7 +89,7 @@ class Platform ():
 		self.r(config)
 
 
-	def playAllPath(self):
+	def playAllProposedPath(self):
 		max_time = 0
 		for a in self.agents:
 			l = a.getProposedPlanLength()
@@ -109,9 +107,33 @@ class Platform ():
 					self.r(a.getConfigOfProposedPlanAtTime(t))
 			# sleep(0.003)
 
-	def validateAllPath(self):
+	def playAllPermittedPath(self):
 		max_time = 0
 		for a in self.agents:
+			l = a.getPermittedPlanLength()
+			if l > max_time:
+				max_time = l
+		
+		for t in range(max_time):
+			# print 'time is ', t
+			for i in range(len(self.agents)):
+				a = self.agents[i]
+				if  a.getPermittedPlanLength() > t:
+					# print 'agent ', a.index, 
+					self.loadAgentView(i+1)
+					# and then set the agent to its current configuration
+					self.r(a.getConfigOfPermittedPlanAtTime(t))
+			# sleep(0.003)
+
+
+	def validateAllPaths(self, agents_remained):
+		print '******* start validation **********'
+		print agents_remained
+
+		max_time = 0
+		for i in agents_remained:
+			a = self.agents[i]
+
 			a.startDefaultSolver()
 			a.setBounds()
 			a.setEnvironment()
@@ -122,25 +144,29 @@ class Platform ():
 				max_time = l
 
 		for t in range (max_time):
-			print '\n\n\nthis is time ', t
-			for i in range (len(self.agents)):
+			print '\n this is time ', t
+			for i in agents_remained:
 				a = self.agents[i]
+
 				a.startDefaultSolver()
+				a.setBounds()
+				a.setEnvironment()
+				a.loadOtherAgents()
 
 				print 'this is robot ', a.robot.name
 				# a1.obstacle.getObstacleNames(False, 1000)
 				if a.getProposedPlanLength() > t:
-					myconfig = a.getConfigOfProposedPlanAtTime(t)
-					myspec = a.getMoveSpecification(myconfig)
-					print 'the agent is at ', myspec[0], myspec[1]
+					# myconfig = a.getConfigOfProposedPlanAtTime(t)
+					# myspec = a.getMoveSpecification(myconfig)
+					# print 'the agent is at ', myspec[0], myspec[1]
 					# first of all, move all the obstacles
 					for oa in self.agents: # other agents
 						if a.index != oa.index:
 							# print '\t and moving the ghost of ', oa.robot.name
-							if oa.getProposedPlanLength() > t:
-								config = oa.getConfigOfProposedPlanAtTime(t)
-							else:
+							if not (oa.index in agents_remained) or oa.getProposedPlanLength() <= t:
 								config = oa.end_config
+							else:
+								config = oa.getConfigOfProposedPlanAtTime(t)
 							spec = oa.getMoveSpecification(config)
 							a.obstacle.moveObstacle(oa.robot.name + 'base_link_0', spec)
 							print '\tmove ghost', oa.robot.name, ' to ', spec[0], spec[1] 
@@ -154,50 +180,43 @@ class Platform ():
 
 
 
-	def construct_tree (self):
-		terminates = False
-		while not terminates:
+	def construct_tree (self, iteration):
+		print '******************* this is iternation ', iteration, ' ***********************'
+		self.current_node.printInformation()
+		if iteration > 0:
 			#expand the tree by doing planning for each agent and find the collision momment
-			for a in self.agents:
-				#according to the configuration of the node
-				a.startNodeSolver(self.current_node)
-				a.setBounds()
-				a.setEnvironment()
-				a.loadOtherAgents()
-				a.solve()
-				a.storePath()
-
-			t = pl.validateAllPath()
-
-			if t == -1:
+			for i in self.current_node.getAgentsRemained():
+				a = self.agents[i]
+				print '>>>>>>>>>>>>this is agent', a.robot.name , ' computing ' 
+				a.computePlan(self.current_node)
+				
+			t = self.validateAllPaths(self.current_node.getAgentsRemained())
+			print 'in this iteration, the collision appears at time ', t
+			if t == -1: # the path is valid! we terminate the process
 				paths = []
-				configs = []
+				indexes_and_paths = []
 				for a in self.agents:
-					paths.append(a.obtainProposedPlan())
-					configs.append(a.end_config)
+					indexes_and_paths.append((a.index, a.obtainProposedPlan()))
 
-				child = self.current_node.expend(configs)
-				child.recordPath(paths)
-				if (child.terminates(self.end_node)):
-					self.current_node = child
-					return True
-
+				child = self.current_node.expand(indexes_and_paths, [])
+				return (True, child.paths)
 			else:
-				configs = []
-				for a in self.agents:
-					if a.getProposedPlanLength() > t:
-						config = a.getConfigOfProposedPlanAtTime(t)
+				reached = []
+				indexes_and_paths = []
+				for i in self.current_node.getAgentsRemained():
+					a = self.agents[i]
+					if a.getProposedPlanLength() > t - 1: # up to t, because t is the moment of collision!
+						path = a.obtainProposedPlan()[:t-1]
+						indexes_and_paths.append((i, path))
 					else:
-						config = a.end_config
-					configs.append(config)
-				self.current_node = self.current_node.expand(configs)
-				self.iteration -= 1
-			
-			if self.iteration <= 0:
-				return False
-			else:
-				self.construct_tree()
+						reached.append(i) # reached, therefore remove from the remaining list
+						indexes_and_paths.append((i, a.obtainProposedPlan()))
+				self.current_node = self.current_node.expand(indexes_and_paths, reached)
+
+				return self.construct_tree(iteration - 1)
+		else: # can not find a path for each agent within limited iteration
+			return (False, None)
 
 
-#append the path!!!!!!!!!!!!!!!!
-# the index is also wrong?
+# remove those who has already got to where they suppose to be
+# at least one step ----------- frangment

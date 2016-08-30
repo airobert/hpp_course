@@ -23,6 +23,8 @@ class Agent (Client):
 	start_config = [] 
 	end_config = []
 	current_config = []
+	permitted_plan = []
+
 	repeat = 0
 
 	def __init__ (self, robot, start, end):
@@ -59,6 +61,7 @@ class Agent (Client):
 			print '\tlower bound: {0:.3f}'.format(lower), '\tupper bound: {0:.3f}'.format(upper) 
 
 	def startDefaultSolver(self):
+		self.repeat += 1
 		name = self.robot.name
 		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
 		self.robot = PR2Robot(name)
@@ -69,11 +72,14 @@ class Agent (Client):
 		self.ps.addPathOptimizer ("RandomShortcut")
 
 	def startNodeSolver(self, node):
+		self.repeat += 1
 		name = self.robot.name
 		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
 		self.robot = PR2Robot(name)
 		self.ps = ProblemSolver(self.robot)
-		self.ps.setInitialConfig(node.configs[self.index -1])
+		cfg = node.getAgentCurrentConfig(self.index)
+		# print 'cfg = ', cfg
+		self.ps.setInitialConfig(cfg)
 		self.ps.addGoalConfig (self.end_config)
 		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
 		self.ps.addPathOptimizer ("RandomShortcut")
@@ -81,7 +87,7 @@ class Agent (Client):
 	def solve(self):
 		# try catch -------------------
 		print 'solved: ', self.ps.solve()
-		self.repeat += 1
+		# self.repeat += 1
 
 
 	def storePath(self, choice = 0, segments = 2):
@@ -112,6 +118,20 @@ class Agent (Client):
 				config = a.current_config
 				spec = self.getMoveSpecification(config)
 				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
+	
+	def loadOtherAgentsFromNode(self, node):
+		print 'There are ', len(self.platform.agents), 'agents'
+		#load ghost agents
+		for a in self.platform.agents:
+			if (a.index != self.index):
+				# if it is not itself then load a ghost agent
+				g = Ghost()
+				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
+				# and then place it at the initial location of the agent
+				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
+				config = node.getAgentCurrentConfig(a.index)
+				spec = self.getMoveSpecification(config)
+				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
 
 	def setBounds(self):
 		# this is hard-coded for now
@@ -120,8 +140,20 @@ class Agent (Client):
 	def getConfigOfProposedPlanAtTime(self, index):
 		return self.__plan_proposed[index]
 
+	def getConfigOfPermittedPlanAtTime(self, index):
+		return self.permitted_plan[index]
+
 	def getProposedPlanLength(self):
 		return len(self.__plan_proposed)
+
+	def setPermittedPlan(self, plan):
+		self.permitted_plan = plan
+
+	def getPermittedPlanLength(self):
+		return len(self.permitted_plan)
+
+	def obtainPermittedPlan(self):
+		return copy.copy(self.permitted_plan)
 
 		# we will get only a copy of it, not the original one 
 		# to remind the difference, we use 'obtain' instead of 'get'
@@ -134,3 +166,14 @@ class Agent (Client):
 		th = atan2(config[3], config[2]) 
 		# print 'sin = ', self.init_config[3], ' cos = ', self.init_config[2], ' th = ', th
 		return [x, y, 0, cos(th / 2) , 0, 0, sin(th / 2)]
+
+	def computePlan(self, node):
+		self.startNodeSolver(node)
+		self.setBounds()
+		self.setEnvironment()
+		self.loadOtherAgentsFromNode(node)
+		self.solve()
+		self.storePath()
+		
+
+

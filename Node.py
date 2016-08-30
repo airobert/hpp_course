@@ -3,24 +3,43 @@
 # this is a class to represent the searching tree
 
 class Node ():
-	configs = []
+	# configs = []
+	agent_remained = []
+	paths = []
 	children = []
 
-	paths = []
-
 	def __init__(self, configs):
-		self.configs = configs
+		self.agent_remained = range (len(configs)) # all the agents
+		self.paths = map ((lambda x: [x]), configs)
 
-	def expand (self, configs):
-		child = Node (configs)
-		self.children.append(child)
+	def cloneNode (self):
+		node = Node ([])
+		node.paths = self.paths
+		node.agent_remained = self.agent_remained
+		return node
+
+	def expand (self, indexes_and_paths, reached_agents):
+		child = self.cloneNode()
+		for (index, path) in indexes_and_paths:
+			child.paths[index] = child.paths[index] + path[1::]
+		child.agent_remained = self.agent_remained
+		for a in reached_agents:
+			self.agent_remained.remove(a)
 		return child
 
-	def terminates(self, end_node):
-		if self.configs == end_node.configs:
-			return true
-		else:
-			return false
+	def terminates(self):
+		return (self.agent_remained == [])
 
-	def recordPath(self, paths):
-		self.paths = paths
+	def getAgentCurrentConfig(self, agent):
+		return self.paths[agent][-1]
+
+	def getAgentsRemained(self):
+		return self.agent_remained
+
+	def printInformation(self):
+		print 'the agents remained', self.agent_remained
+		for i in range (2):
+			print 'for agent ', i, ' it moved like: '
+			for p in self.paths[i]:
+				print '\t', p[0], p[1]
+		print '---------------------------'
