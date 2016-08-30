@@ -8,6 +8,7 @@ from hpp.corbaserver.pr2 import Robot as PR2Robot
 from math import cos, sin, asin, acos, atan2, pi
 from time import sleep
 from Ghost import Ghost
+import copy
 
 
 class Agent (Client):
@@ -67,6 +68,16 @@ class Agent (Client):
 		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
 		self.ps.addPathOptimizer ("RandomShortcut")
 
+	def startNodeSolver(self, node):
+		name = self.robot.name
+		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
+		self.robot = PR2Robot(name)
+		self.ps = ProblemSolver(self.robot)
+		self.ps.setInitialConfig(node.configs[self.index -1])
+		self.ps.addGoalConfig (self.end_config)
+		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
+		self.ps.addPathOptimizer ("RandomShortcut")
+
 	def solve(self):
 		# try catch -------------------
 		print 'solved: ', self.ps.solve()
@@ -111,6 +122,11 @@ class Agent (Client):
 
 	def getProposedPlanLength(self):
 		return len(self.__plan_proposed)
+
+		# we will get only a copy of it, not the original one 
+		# to remind the difference, we use 'obtain' instead of 'get'
+	def obtainProposedPlan(self):
+		return copy.copy(self.__plan_proposed)
 
 	def getMoveSpecification(self, config):
 		x = config[0]

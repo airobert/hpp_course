@@ -13,7 +13,7 @@ from hpp.gepetto import ViewerFactory
 # from hpp.corbaserver.manipulation.pr2 import Robot
 # from hpp.corbaserver.manipulation import robot as METARobot
 # from hpp.corbaserver.manipulation import ProblemSolver, ConstraintGraph
-
+from Node import Node
 from time import sleep
 
 class Platform ():
@@ -31,14 +31,29 @@ class Platform ():
 	# a dictionary to get the agent's index
 	index_dic = {}
 
+	#for tree searching
+	tree = None
+	end_node = None
+	current_node = None
+	iteration = 100
+
 	# pp = PathPlayer (rbprmBuilder.client.basic,ls r)
 	def __init__(self, agents):
 		self.agents = agents
+		init_configs = []
+		end_configs = []
 		for i in range (len(agents)):
+			a = agents[i]
+			init_configs.append(a.start_config)
+			end_configs.append(a.end_config)
 			self.index_dic[agents[i].robot.name] = i
 			self.agents[i].registerPlatform(self, i)
 			print 'the agent ', agents[i].robot.name, ' is now registered with the index ', self.getInidex(agents[i].robot.name) 
-	
+		self.tree = Node (init_configs)
+		self.current_node = tree
+		self.end_node = Node (end_configs)
+
+
 	def start(self):
 		# self.problem.selectProblem(0)
 		self.ps = ProblemSolver(self.agents[0].robot)
@@ -139,3 +154,50 @@ class Platform ():
 
 
 
+	def construct_tree (self):
+		terminates = False
+		while not terminates:
+			#expand the tree by doing planning for each agent and find the collision momment
+			for a in self.agents:
+				#according to the configuration of the node
+				a.startNodeSolver(self.current_node)
+				a.setBounds()
+				a.setEnvironment()
+				a.loadOtherAgents()
+				a.solve()
+				a.storePath()
+
+			t = pl.validateAllPath()
+
+			if t == -1:
+				paths = []
+				configs = []
+				for a in self.agents:
+					paths.append(a.obtainProposedPlan())
+					configs.append(a.end_config)
+
+				child = self.current_node.expend(configs)
+				child.recordPath(paths)
+				if (child.terminates(self.end_node)):
+					self.current_node = child
+					return True
+
+			else:
+				configs = []
+				for a in self.agents:
+					if a.getProposedPlanLength() > t:
+						config = a.getConfigOfProposedPlanAtTime(t)
+					else:
+						config = a.end_config
+					configs.append(config)
+				self.current_node = self.current_node.expand(configs)
+				self.iteration -= 1
+			
+			if self.iteration <= 0:
+				return False
+			else:
+				self.construct_tree()
+
+
+#append the path!!!!!!!!!!!!!!!!
+# the index is also wrong?

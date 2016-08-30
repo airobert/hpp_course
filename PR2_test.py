@@ -47,6 +47,8 @@ bc = BasicHouse("bc")
 pl.setEnvironment(bc)
 pl.start()
 
+#obtain a 
+
 a1.startDefaultSolver()
 a1.setBounds()
 a1.setEnvironment()
@@ -67,7 +69,6 @@ a3.setEnvironment()
 a3.loadOtherAgents()
 a3.solve()
 a3.storePath()
-
 
 # pl.playAllPath()
 pl.validateAllPath()
