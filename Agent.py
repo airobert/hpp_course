@@ -3,6 +3,7 @@ import sys
 # from hpp.corbaserver.robot import Robot
 from hpp.corbaserver import ProblemSolver
 from hpp.corbaserver import Client
+from hpp import Error
 from hpp.gepetto import ViewerFactory
 from hpp.corbaserver.pr2 import Robot as PR2Robot
 from math import cos, sin, asin, acos, atan2, pi
@@ -78,7 +79,7 @@ class Agent (Client):
 		self.robot = PR2Robot(name)
 		self.ps = ProblemSolver(self.robot)
 		cfg = node.getAgentCurrentConfig(self.index)
-		# print 'cfg = ', cfg
+		print 'this iteration, the agent', name, 'starts from ', cfg[0], cfg[1]
 		self.ps.setInitialConfig(cfg)
 		self.ps.addGoalConfig (self.end_config)
 		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
@@ -86,7 +87,13 @@ class Agent (Client):
 
 	def solve(self):
 		# try catch -------------------
-		print 'solved: ', self.ps.solve()
+		try: 
+			print 'solved: ', self.ps.solve()
+		except Error as e:
+			print e.msg
+			print 'there is a collision, I should give up this node and move up to parent node and try new solutions'
+			return -1
+
 		# self.repeat += 1
 
 
@@ -99,6 +106,8 @@ class Agent (Client):
 		if self.ps.configAtParam(choice, self.ps.pathLength(choice)) == self.end_config:
 			self.__plan_proposed.append(self.end_config)
 		print 'stored; plan length: ', len(self.__plan_proposed)
+
+	# def playProposed
 	
 	def setEnvironment(self):
 		if self.platform.env != None:
@@ -128,14 +137,20 @@ class Agent (Client):
 				g = Ghost()
 				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
 				# and then place it at the initial location of the agent
-				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
 				config = node.getAgentCurrentConfig(a.index)
 				spec = self.getMoveSpecification(config)
 				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
+				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost', 'it is at ', spec [0], spec [1]
 
 	def setBounds(self):
+
+		if ('Environment.Kitchen' in str(type(self.platform.env))):
+			self.robot.setJointBounds("base_joint_xy", [-5,0,-10,0])
+		else:
+			self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
 		# this is hard-coded for now
-		self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
+		# if (env == 'house')
+		# else:
 
 	def getConfigOfProposedPlanAtTime(self, index):
 		return self.__plan_proposed[index]
@@ -172,8 +187,13 @@ class Agent (Client):
 		self.setBounds()
 		self.setEnvironment()
 		self.loadOtherAgentsFromNode(node)
-		self.solve()
-		self.storePath()
+		if self.solve() != -1:
+			self.storePath()
+		else:
+			print 'take the previous one and continue the searching'
+			return -1
+
+
 		
 
 

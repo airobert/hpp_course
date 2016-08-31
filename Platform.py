@@ -90,6 +90,7 @@ class Platform ():
 
 
 	def playAllProposedPath(self):
+		print 'play proposed path'
 		max_time = 0
 		for a in self.agents:
 			l = a.getProposedPlanLength()
@@ -188,7 +189,8 @@ class Platform ():
 			for i in self.current_node.getAgentsRemained():
 				a = self.agents[i]
 				print '>>>>>>>>>>>>this is agent', a.robot.name , ' computing ' 
-				a.computePlan(self.current_node)
+				if (a.computePlan(self.current_node) == -1):
+					print 'should I got up a level or start the search again?'
 				
 			t = self.validateAllPaths(self.current_node.getAgentsRemained())
 			print 'in this iteration, the collision appears at time ', t
@@ -211,8 +213,8 @@ class Platform ():
 					else:
 						reached.append(i) # reached, therefore remove from the remaining list
 						indexes_and_paths.append((i, a.obtainProposedPlan()))
-				self.current_node = self.current_node.expand(indexes_and_paths, reached)
-
+				self.current_node = self.current_node.expand(indexes_and_paths, reached) 
+				self.playAllProposedPath()
 				return self.construct_tree(iteration - 1)
 		else: # can not find a path for each agent within limited iteration
 			return (False, None)

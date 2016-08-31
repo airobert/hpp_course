@@ -24,7 +24,7 @@ class Node ():
 			child.paths[index] = child.paths[index] + path[1::]
 		child.agent_remained = self.agent_remained
 		for a in reached_agents:
-			self.agent_remained.remove(a)
+			child.agent_remained.remove(a)
 		return child
 
 	def terminates(self):
