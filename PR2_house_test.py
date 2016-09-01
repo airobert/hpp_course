@@ -32,8 +32,8 @@ r3 = PR2Robot('brother')
 
 q_init = r3.getCurrentConfig()
 q_goal = q_init[::]
-q_init[0] = 0 # instead of -2
-q_init[1] = 2 # instead of -3
+q_init[0] = -2 # instead of -2
+q_init[1] = -3 # instead of -3
 q_goal[0] = 1.5
 q_goal[1] = 3
 

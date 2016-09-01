@@ -59,6 +59,17 @@ class Platform ():
 		if self.env != None:
 			self.vf.loadObstacleModel(self.env.packageName, self.env.urdfName, self.env.name)
 		self.r = self.vf.createViewer()
+		for a in self.agents:
+			a.startDefaultSolver()
+			a.setBounds()
+			a.setEnvironment()
+			a.solve()
+			a.storePath()
+			# self.loadAgentView(a.index)
+			# self.r(a.start_config)
+			print 'the agent ', a.robot.name, ' now has a backup plan of length', a.getProposedPlanLength()
+
+
 		# self.pp = PathPlayer (self.agents[0], self.r)
 
 
@@ -130,7 +141,7 @@ class Platform ():
 
 	def validateAllPaths(self, agents_remained):
 		print '******* start validation **********'
-		print agents_remained
+		# print agents_remained
 
 		max_time = 0
 		for i in agents_remained:
@@ -155,7 +166,7 @@ class Platform ():
 				a.setEnvironment()
 				a.loadOtherAgents()
 
-				print 'this is robot ', a.robot.name
+				# print 'this is robot ', a.robot.name
 				# a1.obstacle.getObstacleNames(False, 1000)
 				if a.getProposedPlanLength() > t:
 					# myconfig = a.getConfigOfProposedPlanAtTime(t)
@@ -191,15 +202,18 @@ class Platform ():
 				a = self.agents[i]
 				print '>>>>>>>>>>>>this is agent', a.robot.name , ' computing ' 
 				if (a.computePlan(self.current_node) == -1):
-					print 'should I got up a level or start the search again?'
-			self.playAllProposedPath()
-				
+					print 'the agent is now using its backup plan/plan from last time'
+					# line = input()
+
+			# self.playAllProposedPath()
+
 			t = self.validateAllPaths(self.current_node.getAgentsRemained())
 			print 'in this iteration, the collision appears at time ', t
 			if t == -1: # the path is valid! we terminate the process
 				paths = []
 				indexes_and_paths = []
-				for a in self.agents:
+				for i in self.current_node.agent_remained:
+					a = self.agents[i]
 					indexes_and_paths.append((a.index, a.obtainProposedPlan()))
 
 				child = self.current_node.expand(indexes_and_paths, [])

@@ -10,7 +10,7 @@ from math import cos, sin, asin, acos, atan2, pi
 from time import sleep
 from Ghost import Ghost
 import copy
-
+from  threading import Timer
 
 class Agent (Client):
 	robot = None
@@ -85,13 +85,19 @@ class Agent (Client):
 		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
 		self.ps.addPathOptimizer ("RandomShortcut")
 
+	def terminate_solving(self):
+		self.problem.interruptPathPlanning ()
+
 	def solve(self):
 		# try catch -------------------
 		try: 
+			t = Timer (30.0, self.terminate_solving)
+			t.start()
 			print 'solved: ', self.ps.solve()
+			t.cancel()
 		except Error as e:
 			print e.msg
-			print 'there is a collision, I should give up this node and move up to parent node and try new solutions'
+			print '***************\nfailed to plan within limited time\n**************'
 			return -1
 
 		# self.repeat += 1
@@ -124,9 +130,10 @@ class Agent (Client):
 				g = Ghost()
 				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
 				# and then place it at the initial location of the agent
-				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
+				# print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
 				config = a.current_config
 				spec = self.getMoveSpecification(config)
+				spec [2] = 0.3 
 				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
 	
 	def loadOtherAgentsFromNode(self, node):
@@ -193,7 +200,7 @@ class Agent (Client):
 		if self.solve() != -1:
 			self.storePath()
 		else:
-			self.__plan_proposed = self.__plan_proposed[len(node.getAgentPlan(self.index))::]
+			self.__plan_proposed = self.__plan_proposed[node.progress_time::]
 			[node.getAgentCurrentConfig(self.index)]
 			print 'take the previous one and continue the searching'
 			return -1
