@@ -99,6 +99,7 @@ class Agent (Client):
 
 	def storePath(self, choice = 0, segments = 2):
 		# always store the first one for now
+		self.__plan_proposed = []
 		for p in range(int(round(segments * self.ps.pathLength(choice)))):
 			self.__plan_proposed.append(self.ps.configAtParam(choice, p* 1.0 / segments))
 		
@@ -143,11 +144,13 @@ class Agent (Client):
 				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost', 'it is at ', spec [0], spec [1]
 
 	def setBounds(self):
-
-		if ('Environment.Kitchen' in str(type(self.platform.env))):
-			self.robot.setJointBounds("base_joint_xy", [-5,0,-10,0])
+		if self.platform.env != None:
+			if ('Environment.Kitchen' in str(type(self.platform.env))):
+				self.robot.setJointBounds("base_joint_xy", [-5,0,-10,0])
+			else:
+				self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
 		else:
-			self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
+			self.robot.setJointBounds("base_joint_xy", [-10,10,-10,10])
 		# this is hard-coded for now
 		# if (env == 'house')
 		# else:
