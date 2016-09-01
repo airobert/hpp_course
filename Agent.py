@@ -116,7 +116,7 @@ class Agent (Client):
 
 	
 	def loadOtherAgents(self):
-		print 'There are ', len(self.platform.agents), 'agents'
+		# print 'There are ', len(self.platform.agents), 'agents'
 		#load ghost agents
 		for a in self.platform.agents:
 			if (a.index != self.index):
@@ -146,7 +146,7 @@ class Agent (Client):
 	def setBounds(self):
 		if self.platform.env != None:
 			if ('Environment.Kitchen' in str(type(self.platform.env))):
-				self.robot.setJointBounds("base_joint_xy", [-5,0,-10,0])
+				self.robot.setJointBounds("base_joint_xy", [-5,0,-10,2])
 			else:
 				self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
 		else:
@@ -193,6 +193,8 @@ class Agent (Client):
 		if self.solve() != -1:
 			self.storePath()
 		else:
+			self.__plan_proposed = self.__plan_proposed[len(node.getAgentPlan(self.index))::]
+			[node.getAgentCurrentConfig(self.index)]
 			print 'take the previous one and continue the searching'
 			return -1
 

@@ -19,6 +19,7 @@ class Node ():
 		return node
 
 	def expand (self, indexes_and_paths, reached_agents):
+		print '\n \n \n  these agents are removed!!!!!!!!!', reached_agents
 		child = self.cloneNode()
 		for (index, path) in indexes_and_paths:
 			child.paths[index] = child.paths[index] + path[1::]
@@ -38,8 +39,11 @@ class Node ():
 
 	def printInformation(self):
 		print 'the agents remained', self.agent_remained
-		for i in range (2):
+		for i in range (len(self.agent_remained)):
 			print 'for agent ', i, ' it moved like: '
 			for p in self.paths[i]:
 				print '\t', p[0], p[1]
 		print '---------------------------'
+
+	def getAgentPlan (self, agent):
+		return self.paths[agent]

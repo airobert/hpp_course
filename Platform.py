@@ -56,7 +56,8 @@ class Platform ():
 		# self.problem.selectProblem(0)
 		self.ps = ProblemSolver(self.agents[0].robot)
 		self.vf = ViewerFactory(self.ps)
-		self.vf.loadObstacleModel(self.env.packageName, self.env.urdfName, self.env.name)
+		if self.env != None:
+			self.vf.loadObstacleModel(self.env.packageName, self.env.urdfName, self.env.name)
 		self.r = self.vf.createViewer()
 		# self.pp = PathPlayer (self.agents[0], self.r)
 
@@ -191,6 +192,7 @@ class Platform ():
 				print '>>>>>>>>>>>>this is agent', a.robot.name , ' computing ' 
 				if (a.computePlan(self.current_node) == -1):
 					print 'should I got up a level or start the search again?'
+			self.playAllProposedPath()
 				
 			t = self.validateAllPaths(self.current_node.getAgentsRemained())
 			print 'in this iteration, the collision appears at time ', t
@@ -214,7 +216,7 @@ class Platform ():
 						reached.append(i) # reached, therefore remove from the remaining list
 						indexes_and_paths.append((i, a.obtainProposedPlan()))
 				self.current_node = self.current_node.expand(indexes_and_paths, reached) 
-				self.playAllProposedPath()
+				
 				return self.construct_tree(iteration - 1)
 		else: # can not find a path for each agent within limited iteration
 			return (False, None)

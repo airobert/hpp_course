@@ -34,19 +34,19 @@ q_goal[1] = -3
 a2 = Agent(r2, q_init, q_goal)
 
 # # agent 3
-# r3 = PR2Robot('brother')
+r3 = PR2Robot('brother')
 
-# q_init = r3.getCurrentConfig()
-# q_goal = q_init[::]
-# q_init[0] = 0 # instead of -2
-# q_init[1] = 2 # instead of -3
-# q_goal[0] = 1.5
-# q_goal[1] = 3
+q_init = r3.getCurrentConfig()
+q_goal = q_init[::]
+q_init[0] = 0 # instead of -2
+q_init[1] = 1 # instead of -3
+q_goal[0] = -1.5
+q_goal[1] = -3
 
-# a3 = Agent(r3, q_init, q_goal)
+a3 = Agent(r3, q_init, q_goal)
 
 # platform
-pl = Platform([a1, a2])
+pl = Platform([a1, a2, a3])
 kc = Kitchen("kc")
 pl.setEnvironment(kc)
 pl.start()
