@@ -1,3 +1,4 @@
+#tests completed!
 # gepetto-viewer-server
 # not hpp-manipulation-server
 # hppcorbaserver

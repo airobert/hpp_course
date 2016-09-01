@@ -1,3 +1,5 @@
 start logbook
 
 detect collision
+
+start rbprm version

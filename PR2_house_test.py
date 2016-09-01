@@ -1,4 +1,4 @@
-
+#tests completed!
 
 from Agent import *
 from Platform import *
