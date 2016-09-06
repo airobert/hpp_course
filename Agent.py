@@ -1,14 +1,22 @@
 import sys
+from hpp.corbaserver.rbprm.rbprmbuilder import Builder
+from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
+from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+# from hpp.gepetto import Viewer
+from time import sleep
+import numpy as np
 
 # from hpp.corbaserver.robot import Robot
-from hpp.corbaserver import ProblemSolver
-from hpp.corbaserver import Client
+# from hpp.corbaserver import ProblemSolver
+# from hpp.corbaserver import Client
+from hpp.corbaserver.rbprm import Client
 from hpp import Error
 from hpp.gepetto import ViewerFactory
-from hpp.corbaserver.pr2 import Robot as PR2Robot
+# from hpp.corbaserver.pr2 import Robot as PR2Robot
 from math import cos, sin, asin, acos, atan2, pi
 from time import sleep
-from Ghost import Ghost
+from HyQ import HyQTrunk
+from Ghost import HyQGhost
 import copy
 from  threading import Timer
 
@@ -18,8 +26,6 @@ class Agent (Client):
 	index = 0
 	ps = None
 	ghosts = []
-	ghost_urdf = ''
-	ghost_package = ''
 	# to avoid confusion, we use start and end instead of init and goal
 	start_config = [] 
 	end_config = []
@@ -39,7 +45,9 @@ class Agent (Client):
 		self.current_config = self.start_config
 		self.__plan_proposed = []
 
-
+	# def buildRobot(self):
+	# 	print "building a robot"
+		# self.robot = PR2Robot(self.name)
 
 	def registerPlatform(self, platform, index):
 		self.platform = platform
@@ -64,13 +72,14 @@ class Agent (Client):
 	def startDefaultSolver(self):
 		self.repeat += 1
 		name = self.robot.name
-		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
-		self.robot = PR2Robot(name)
+		# self.ps = ProblemSolver(self.robot)
+		# self.ps.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
 		self.ps = ProblemSolver(self.robot)
+		self.robot = HyQTrunk()
 		self.ps.setInitialConfig(self.start_config)
 		self.ps.addGoalConfig (self.end_config)
-		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
-		self.ps.addPathOptimizer ("RandomShortcut")
+		self.ps.client.problem.selectConFigurationShooter("RbprmShooter")
+		self.ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 	def startNodeSolver(self, node):
 		self.repeat += 1
@@ -127,7 +136,7 @@ class Agent (Client):
 		for a in self.platform.agents:
 			if (a.index != self.index):
 				# if it is not itself then load a ghost agent
-				g = Ghost()
+				g = HyQGhost()
 				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
 				# and then place it at the initial location of the agent
 				# print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
@@ -151,17 +160,8 @@ class Agent (Client):
 				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost', 'it is at ', spec [0], spec [1]
 
 	def setBounds(self):
-		if self.platform.env != None:
-			if ('Environment.Kitchen' in str(type(self.platform.env))):
-				self.robot.setJointBounds("base_joint_xy", [-5,0,-10,2])
-			else:
-				self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
-		else:
-			self.robot.setJointBounds("base_joint_xy", [-10,10,-10,10])
-		# this is hard-coded for now
-		# if (env == 'house')
-		# else:
-
+		self.robot.setJointBounds ("base_joint_xyz", [-35,10, -4, 4, -1, 1])
+		
 	def getConfigOfProposedPlanAtTime(self, index):
 		return self.__plan_proposed[index]
 

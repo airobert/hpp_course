@@ -1,11 +1,13 @@
 # gepetto-viewer-server
 # not hpp-manipulation-server
 # hppcorbaserver
+# hpp-rbprm-server 
 # -DCMAKE_INSTALL_PREFIX=/home/airobert/HPP/install
 
-from Environment import BasicHouse
+from Environment import Airplane
 from Obstacle import Obstacle
-from hpp.corbaserver import ProblemSolver
+# from hpp.corbaserver import ProblemSolver
+from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
 # from hpp.corbaserver.manipulation import ProblemSolver as MProblemSolver, ConstraintGraph
 from hpp.gepetto import PathPlayer
 from hpp.gepetto import ViewerFactory
