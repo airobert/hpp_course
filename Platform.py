@@ -64,7 +64,7 @@ class Platform ():
 		for a in self.agents:
 			a.startDefaultSolver()
 			a.setBounds()
-			a.setEnvironment()
+			# a.setEnvironment()
 			a.solve()
 			a.storePath()
 			# self.loadAgentView(a.index)
@@ -150,8 +150,8 @@ class Platform ():
 			a = self.agents[i]
 
 			a.startDefaultSolver()
-			a.setBounds()
-			a.setEnvironment()
+			# a.setBounds()
+			# a.setEnvironment()
 			a.loadOtherAgents()
 
 			l = a.getProposedPlanLength()
@@ -164,8 +164,8 @@ class Platform ():
 				a = self.agents[i]
 
 				a.startDefaultSolver()
-				a.setBounds()
-				a.setEnvironment()
+				# a.setBounds()
+				# a.setEnvironment()
 				a.loadOtherAgents()
 
 				# print 'this is robot ', a.robot.name
@@ -180,15 +180,17 @@ class Platform ():
 							# print '\t and moving the ghost of ', oa.robot.name
 							if not (oa.index in agents_remained) or oa.getProposedPlanLength() <= t:
 								config = oa.end_config
+								print '(((((((((((((('
 							else:
 								config = oa.getConfigOfProposedPlanAtTime(t)
 							spec = oa.getMoveSpecification(config)
-							a.obstacle.moveObstacle(oa.robot.name + 'base_link_0', spec)
+							a.ps.client.obstacle.moveObstacle(oa.robot.name + 'base_link_0', spec)
 							print '\tmove ghost', oa.robot.name, ' to ', spec[0], spec[1] 
 
 					# secondly, test if the configuration is valid 
-					(result, _) = a.robot.isConfigValid(a.getConfigOfProposedPlanAtTime(t))
+					(result, why) = a.robot.isConfigValid(a.getConfigOfProposedPlanAtTime(t))
 					if not result:
+						print why
 						return t
 		# if everything is fine at each time slot, return -1 
 		return -1 

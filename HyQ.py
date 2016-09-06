@@ -30,7 +30,7 @@ from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 
 
 class HyQTrunk(Builder):
-	def __init__(self):
+	def __init__(self, name):
 		Builder.__init__(self)
 		self.rootJointType = 'freeflyer'
 		self.packageName = 'hpp-rbprm-corba'
@@ -46,3 +46,4 @@ class HyQTrunk(Builder):
 		self.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.9)
 		self.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.9)
 		self.boundSO3([-0.1,0.1,-1,1,-1,1])
+		self.name = name

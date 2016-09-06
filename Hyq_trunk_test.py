@@ -6,20 +6,32 @@ from Platform import *
 from Environment import Airplane
 
 # agent 1 
-r1 = HyQTrunk()
+r1 = HyQTrunk('myself')
 q_init = [4, 0, 0.65, 1,0,0,0];
 q_goal = [-27, 0, 0.65, 1,0,0,0];
 r1.setJointBounds ("base_joint_xyz", [-35,10, -4, 4, -1, 1])
 
 a1 = Agent(r1, q_init, q_goal)
 
+# agent 2 
+r2 = HyQTrunk('sister')
+q_init = [-27, 2, 0.65, 1,0,0,0];
+q_goal = [4, 2, 0.65, 1,0,0,0];
+r2.setJointBounds ("base_joint_xyz", [-35,10, -4, 4, -1, 1])
+
+a2 = Agent(r2, q_init, q_goal)
+
+
 
 # platform
-pl = Platform([a1])
+pl = Platform([a1, a2])
 
 air = Airplane("air")
 pl.setEnvironment(air)
 pl.start()
+
+
+
 
 print 'start the searching with ', pl.tree.getAgentsRemained(), ' remained'
 
@@ -28,7 +40,7 @@ print 'start the searching with ', pl.tree.getAgentsRemained(), ' remained'
 
 a1.setPermittedPlan(plans[0])
 a2.setPermittedPlan(plans[1])
-a3.setPermittedPlan(plans[2])
+# a3.setPermittedPlan(plans[2])
 
 pl.playAllPermittedPath()
 

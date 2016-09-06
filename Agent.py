@@ -15,7 +15,7 @@ from hpp.gepetto import ViewerFactory
 # from hpp.corbaserver.pr2 import Robot as PR2Robot
 from math import cos, sin, asin, acos, atan2, pi
 from time import sleep
-from HyQ import HyQTrunk
+# from HyQ import HyQTrunk
 from Ghost import HyQGhost
 import copy
 from  threading import Timer
@@ -72,9 +72,10 @@ class Agent (Client):
 	def startDefaultSolver(self):
 		self.repeat += 1
 		name = self.robot.name
-		# self.ps = ProblemSolver(self.robot)
-		# self.ps.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
 		self.ps = ProblemSolver(self.robot)
+		self.ps.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
+		# self.ps = ProblemSolver(self.robot)
+		self.client.robot = r1
 		self.robot = HyQTrunk()
 		self.ps.setInitialConfig(self.start_config)
 		self.ps.addGoalConfig (self.end_config)
@@ -85,14 +86,17 @@ class Agent (Client):
 		self.repeat += 1
 		name = self.robot.name
 		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
-		self.robot = PR2Robot(name)
+		# self.ps.client.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
+		# self.robot = PR2Robot(name)
+		# self.ps = ProblemSolver(self.robot)
+		# self.robot = HyQTrunk()
 		self.ps = ProblemSolver(self.robot)
 		cfg = node.getAgentCurrentConfig(self.index)
-		print 'this iteration, the agent', name, 'starts from ', cfg[0], cfg[1]
+		print 'the agent', name, 'starts from ', cfg[0], cfg[1]
 		self.ps.setInitialConfig(cfg)
 		self.ps.addGoalConfig (self.end_config)
-		self.ps.selectPathPlanner ("VisibilityPrmPlanner")
-		self.ps.addPathOptimizer ("RandomShortcut")
+		self.ps.client.problem.selectConFigurationShooter("RbprmShooter")
+		self.ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
 
 	def terminate_solving(self):
 		self.problem.interruptPathPlanning ()
@@ -137,13 +141,14 @@ class Agent (Client):
 			if (a.index != self.index):
 				# if it is not itself then load a ghost agent
 				g = HyQGhost()
-				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
+				if not ((a.robot.name + 'base_link_0') in self.ps.client.obstacle.getObstacleNames(False, 1000)):
+					self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
 				# and then place it at the initial location of the agent
 				# print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost'
 				config = a.current_config
 				spec = self.getMoveSpecification(config)
 				spec [2] = 0.3 
-				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
+				self.ps.client.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
 	
 	def loadOtherAgentsFromNode(self, node):
 		print 'There are ', len(self.platform.agents), 'agents'
@@ -151,17 +156,18 @@ class Agent (Client):
 		for a in self.platform.agents:
 			if (a.index != self.index):
 				# if it is not itself then load a ghost agent
-				g = Ghost()
-				self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
+				g = HyQGhost()
+				if not ((a.robot.name + 'base_link_0') in self.ps.client.obstacle.getObstacleNames(False, 1000)):
+					self.ps.loadObstacleFromUrdf(g.packageName, g.urdfName, a.robot.name) # it's the robot's name!!!
 				# and then place it at the initial location of the agent
 				config = node.getAgentCurrentConfig(a.index)
 				spec = self.getMoveSpecification(config)
-				self.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
+				self.ps.client.obstacle.moveObstacle(a.robot.name + 'base_link_0', spec)
 				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost', 'it is at ', spec [0], spec [1]
 
 	def setBounds(self):
 		self.robot.setJointBounds ("base_joint_xyz", [-35,10, -4, 4, -1, 1])
-		
+
 	def getConfigOfProposedPlanAtTime(self, index):
 		return self.__plan_proposed[index]
 
@@ -194,8 +200,8 @@ class Agent (Client):
 
 	def computePlan(self, node):
 		self.startNodeSolver(node)
-		self.setBounds()
-		self.setEnvironment()
+		# self.setBounds()
+		# self.setEnvironment()
 		self.loadOtherAgentsFromNode(node)
 		if self.solve() != -1:
 			self.storePath()
