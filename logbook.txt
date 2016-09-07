@@ -3,3 +3,5 @@ start logbook
 detect collision
 
 start rbprm version
+
+change back to devel and start again from rbprm as rbprm2
