@@ -1,15 +1,15 @@
 from hpp.corbaserver.robot import Robot
 
 class HyQ (Robot):
+	robotType = "hyq"
+	packageName = "hyq_description"
+	meshPackageName = "hyq_description"
+	rootJointType = "planar"
+	urdfName = "hyq"
+	urdfSuffix = ""
+	srdfSuffix = ""
 	def __init__(self, agentName):
 		print 'initialising a HyQ agent'
-		self.robotType = "hyq"
-		self.packageName = "hyq_description"
-		self.meshPackageName = "hyq_description"
-		self.rootJointType = "planar"
-		self.urdfName = "hyq"
-		self.urdfSuffix = ""
-		self.srdfSuffix = ""
 		Robot.__init__(self, agentName, self.rootJointType)
 		# self.set_init(0, 0)
 
@@ -21,7 +21,7 @@ class HyQ (Robot):
 		self.init_config[6] = -0.5
 		self.init_config[9] = 0.5
 		self.init_config[12] = -0.5
-		self.init_config[15] = 0.5
+		self.init_config[15] = 0.
 		self.setCurrentConfig(self.init_config)
 		# self.platform.r(self.init_config)
 		# error message
