@@ -1,7 +1,7 @@
-from Agent import Agent
+from hpp.corbaserver.robot import Robot
 
-class HyQ (Agent):
-	def __init__(self, platform, agentIndex, agentName):
+class HyQ (Robot):
+	def __init__(self, agentName):
 		print 'initialising a HyQ agent'
 		self.robotType = "hyq"
 		self.packageName = "hyq_description"
@@ -10,7 +10,7 @@ class HyQ (Agent):
 		self.urdfName = "hyq"
 		self.urdfSuffix = ""
 		self.srdfSuffix = ""
-		Agent.__init__(self, platform, agentIndex, agentName, "hyq")
+		Robot.__init__(self, agentName, self.rootJointType)
 		# self.set_init(0, 0)
 
 	def setInit(self, x, y):
@@ -23,7 +23,7 @@ class HyQ (Agent):
 		self.init_config[12] = -0.5
 		self.init_config[15] = 0.5
 		self.setCurrentConfig(self.init_config)
-		self.platform.r(self.init_config)
+		# self.platform.r(self.init_config)
 		# error message
 
 	# def set_config(x, y): 

@@ -89,6 +89,7 @@ class Platform ():
 
 	def setEnvironment(self, env):
 		self.env = env
+		# self.ps.moveObstacle('airbase_link_0', [0,0, -3, 1,0,0,0])
 		# self.r = self.vf.createViewer()
 
 	# def startViewer(self):

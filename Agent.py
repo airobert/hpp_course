@@ -5,12 +5,13 @@ from hpp.corbaserver import ProblemSolver
 from hpp.corbaserver import Client
 from hpp import Error
 from hpp.gepetto import ViewerFactory
-from hpp.corbaserver.pr2 import Robot as PR2Robot
+# from hpp.corbaserver.pr2 import Robot as PR2Robot
 from math import cos, sin, asin, acos, atan2, pi
 from time import sleep
 from Ghost import Ghost
 import copy
 from  threading import Timer
+from HyQ import HyQ
 
 class Agent (Client):
 	robot = None
@@ -65,7 +66,7 @@ class Agent (Client):
 		self.repeat += 1
 		name = self.robot.name
 		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
-		self.robot = PR2Robot(name)
+		self.robot = HyQ(name)
 		self.ps = ProblemSolver(self.robot)
 		self.ps.setInitialConfig(self.start_config)
 		self.ps.addGoalConfig (self.end_config)
@@ -76,7 +77,7 @@ class Agent (Client):
 		self.repeat += 1
 		name = self.robot.name
 		self.problem.selectProblem(str(self.index)+' '+ str(self.repeat))
-		self.robot = PR2Robot(name)
+		self.robot = HyQ(name)
 		self.ps = ProblemSolver(self.robot)
 		cfg = node.getAgentCurrentConfig(self.index)
 		print 'this iteration, the agent', name, 'starts from ', cfg[0], cfg[1]
@@ -119,7 +120,7 @@ class Agent (Client):
 	def setEnvironment(self):
 		if self.platform.env != None:
 			self.ps.loadObstacleFromUrdf(self.platform.env.packageName, self.platform.env.urdfName, self.platform.env.name)
-
+			# self.ps.moveObstacle('airbase_link_0', [0,0, -3, 1,0,0,0])
 	
 	def loadOtherAgents(self):
 		# print 'There are ', len(self.platform.agents), 'agents'
@@ -151,14 +152,16 @@ class Agent (Client):
 				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost', 'it is at ', spec [0], spec [1]
 
 	def setBounds(self):
-		if self.platform.env != None:
-			if ('Environment.Kitchen' in str(type(self.platform.env))):
-				self.robot.setJointBounds("base_joint_xy", [-5,0,-10,2])
-			else:
-				self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
-		else:
-			self.robot.setJointBounds("base_joint_xy", [-10,10,-10,10])
-		# this is hard-coded for now
+		self.robot.setJointBounds ("base_joint_xy", [-35,10, -4, 4])
+
+		# if self.platform.env != None:
+		# 	if ('Environment.Kitchen' in str(type(self.platform.env))):
+		# 		self.robot.setJointBounds("base_joint_xy", [-5,0,-10,2])
+		# 	else:
+		# 		self.robot.setJointBounds("base_joint_xy", [-10,10,-4,4])
+		# else:
+		# 	self.robot.setJointBounds("base_joint_xy", [-10,10,-10,10])
+		# # this is hard-coded for now
 		# if (env == 'house')
 		# else:
 
@@ -176,6 +179,15 @@ class Agent (Client):
 
 	def getPermittedPlanLength(self):
 		return len(self.permitted_plan)
+
+	def exportPermittedPlan(self, filename):
+		f = open(filename, 'a+')
+		f.write('agent ' + str(self.index) + '\n')
+		for p in self.permitted_plan:
+			f.write(str(p)[1:-1] + '\n')
+		f.close()
+
+
 
 	def obtainPermittedPlan(self):
 		return copy.copy(self.permitted_plan)

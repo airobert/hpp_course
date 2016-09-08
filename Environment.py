@@ -23,3 +23,11 @@ class BasicHouse(Environment):
 		self.packageName = "hpp-rbprm-corba"
 		self.urdfName = "basic"
 		Environment.__init__(self, self.name, self.packageName, self.urdfName, "basic")
+
+		
+class Airplane(Environment):
+	def __init__(self, name):
+		self.name = name
+		self.packageName = "hpp-rbprm-corba"
+		self.urdfName = "simple_boeing"
+		Environment.__init__(self, self.name, self.packageName, self.urdfName, self.name)
