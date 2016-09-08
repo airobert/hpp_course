@@ -104,7 +104,7 @@ class Agent (Client):
 		# self.repeat += 1
 
 
-	def storePath(self, choice = 0, segments = 2):
+	def storePath(self, choice = 0, segments = 8):
 		# always store the first one for now
 		self.__plan_proposed = []
 		for p in range(int(round(segments * self.ps.pathLength(choice)))):
