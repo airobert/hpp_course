@@ -70,6 +70,8 @@ def displayAnimation(filename):
 		if len(allT[a]) > max_time:
 			max_time = len(allT[a])
 	print 'max time : ', max_time
+
+	x = raw_input('press the enter key to start the animation')
 	for t in range(max_time):
 		c = []
 		for a in allT.keys():
@@ -78,7 +80,7 @@ def displayAnimation(filename):
 			else:
 				c = c + convertConfig(allT[a][t])
 		r(c)
-		sleep(0.03)
+		sleep(0.06)
 
 
 

@@ -4,6 +4,7 @@
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
 from hpp.corbaserver.rbprm.problem_solver import ProblemSolver
+from math import cos, sin, asin, acos, atan2, pi
 from hpp.gepetto import Viewer
 from time import sleep
 import numpy as np
@@ -166,7 +167,8 @@ def computeContacts(filename):
 		q_all = []
 		for t in tra:
 			config = fullBody.getCurrentConfig()
-			config[0:7] = [t[0], t[1], 0, 1, 0, 0, 0]
+			th = atan2(t[3], t[2]) 
+			config[0:7] = [t[0], t[1], 0, cos(th / 2) , 0, 0, sin(th / 2)]
 			print a, ' - ', config[0], config[1]
 			configx = fullBody.generateContacts(config, [0,0,1])
 			q_all.append(configx)

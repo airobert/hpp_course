@@ -10,7 +10,7 @@ from Environment import Airplane
 # agent 1 
 r1 = HyQ('myself')
 
-r1.setInit(0,0)
+r1.setInit(3,2)
 
 q_init = r1.getCurrentConfig()
 q_goal = q_init[::]
@@ -36,7 +36,7 @@ a2 = Agent(r2, q_init, q_goal)
 # # agent 3
 
 r3 = HyQ('brother')
-r3.setInit(3,2)
+r3.setInit(0,0)
 q_init = r3.getCurrentConfig()
 q_goal = q_init[::]
 q_goal[0] = -7.5
@@ -48,10 +48,10 @@ a3 = Agent(r3, q_init, q_goal)
 # # agent 4
 
 r4 = HyQ('uncle')
-r4.setInit(-7,2)
+r4.setInit(-9,2)
 q_init = r4.getCurrentConfig()
 q_goal = q_init[::]
-q_goal[0] = 3
+q_goal[0] = -18
 q_goal[1] = 4
 q_goal[2] = 0
 q_goal[3] = -1
@@ -60,19 +60,19 @@ a4 = Agent(r4, q_init, q_goal)
 
 # # agent 5
 
-r5 = HyQ('aunty')
-r5.setInit(9, 2)
-q_init = r5.getCurrentConfig()
-q_goal = q_init[::]
-q_goal[0] = -18
-q_goal[1] = -1.7
-q_goal[2] = 0 
-q_goal[3] = -1
-a5 = Agent(r5, q_init, q_goal)
+# r5 = HyQ('aunty')
+# r5.setInit(9, 2)
+# q_init = r5.getCurrentConfig()
+# q_goal = q_init[::]
+# q_goal[0] = -18
+# q_goal[1] = -1.7
+# q_goal[2] = 0 
+# q_goal[3] = -1
+# a5 = Agent(r5, q_init, q_goal)
 
 
 # platform
-pl = Platform([a1, a2, a3, a4, a5])
+pl = Platform([a1, a2, a3, a4])
 
 
 air = Airplane("air")
@@ -93,8 +93,8 @@ print 'start the searching with ', pl.tree.getAgentsRemained(), ' remained'
 a1.setPermittedPlan(plans[0])
 a2.setPermittedPlan(plans[1])
 a3.setPermittedPlan(plans[2])
-a3.setPermittedPlan(plans[3])
-a3.setPermittedPlan(plans[4])
+a4.setPermittedPlan(plans[3])
+# a3.setPermittedPlan(plans[4])
 
 
 # pl.playAllPermittedPath()
@@ -104,7 +104,7 @@ a1.exportPermittedPlan(filename)
 a2.exportPermittedPlan(filename)
 a3.exportPermittedPlan(filename)
 a4.exportPermittedPlan(filename)
-a5.exportPermittedPlan(filename)
+# a5.exportPermittedPlan(filename)
 
 
 # a1.startDefaultSolver()
