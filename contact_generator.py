@@ -1,5 +1,5 @@
-
-
+# gepetto-viewer-server 
+ # hpp-rbprm-server
 
 from hpp.corbaserver.rbprm.rbprmbuilder import Builder
 from hpp.corbaserver.rbprm.rbprmfullbody import FullBody
@@ -9,71 +9,6 @@ from time import sleep
 import numpy as np
 import sys
 
-
-# gepetto-viewer-server 
-# not hppcorbaserver 
-# but hpp-rbprm-server
-
-# rootJointType = 'freeflyer'
-# packageName = 'hpp-rbprm-corba'
-# meshPackageName = 'hpp-rbprm-corba'
-# urdfName = 'hyq_trunk'
-# urdfNameRom = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
-# urdfNameroms = ['hyq_lhleg_rom','hyq_lfleg_rom','hyq_rfleg_rom','hyq_rhleg_rom']
-# urdfSuffix = ""
-# srdfSuffix = ""
-# # name_of_scene = "groundcrouch"
-# name_of_scene = "simple_boeing"
-
-# #------------------------------------------
-# rbprmBuilder = Builder ()
-
-# rbprmBuilder.loadModel(urdfName, urdfNameRom, rootJointType, meshPackageName, packageName, urdfSuffix, srdfSuffix)
-# # rbprmBuilder.setJointBounds ("base_joint_xyz", [-6,5, -4, 4, 0.6, 2])
-# rbprmBuilder.setFilter(['hyq_rhleg_rom', 'hyq_lfleg_rom', 'hyq_rfleg_rom','hyq_lhleg_rom'])
-# rbprmBuilder.setNormalFilter('hyq_lhleg_rom', [0,0,1], 0.9)
-# rbprmBuilder.setNormalFilter('hyq_rfleg_rom', [0,0,1], 0.9)
-# rbprmBuilder.setNormalFilter('hyq_lfleg_rom', [0,0,1], 0.9)
-# rbprmBuilder.setNormalFilter('hyq_rhleg_rom', [0,0,1], 0.9)
-# rbprmBuilder.boundSO3([-0.1,0.1,-1,1,-1,1])
-
-# # ~ from hpp.corbaserver.rbprm. import ProblemSolver
-
-
-# ps = ProblemSolver( rbprmBuilder )
-
-# r = Viewer (ps)
-
-# rbprmBuilder.setJointBounds ("base_joint_xyz", [-35,10, -4, 4, -1, 1])
-# #q_init = [0, 4, 0.65, 0.7071,0,0,0.7071];
-# #q_goal = [0, -27, 0.65, 0.7071,0,0,0.7071];
-# q_init = [4, 0, 0.65, 1,0,0,0];
-# q_goal = [-27, 0, 0.65, 1,0,0,0];
-# # rbprmBuilder.setCurrentConfig (q_init); r (q_init)
-
-# # q_init = rbprmBuilder.getCurrentConfig ();
-# # q_init = [-6,-3,0.8,1,0,0,0]; 
-
-# # q_goal = [4, 4, 0.8, 1, 0, 0, 0]; r (q_goal)
-
-# ps.addPathOptimizer("RandomShortcut")
-# ps.setInitialConfig (q_init)
-# ps.addGoalConfig (q_goal)
-
-
-# r.loadObstacleModel (packageName, name_of_scene, "planning")
-# r.loadObstacleModel (packageName, 'hyq_trunk', "hyq_ghost")
-# # r.loadObstacleModel (packageName, "box", "box")
-
-
-# # r.client.gui.setColor('planning', [1,1,1,0.3])
-# ps.client.problem.selectConFigurationShooter("RbprmShooter")
-# ps.client.problem.selectPathValidation("RbprmPathValidation",0.05)
-# r(q_init)
-# t = ps.solve () ; #what if I don't have this?
-# # if isinstance(t, list):
-# # 	t = t[0]* 3600000 + t[1] * 60000 + t[2] * 1000 + t[3]
-# # ****************************************************************************
 
 
 
@@ -226,8 +161,8 @@ def exportContacts(agent_index, configs, filename):
 
 def computeContacts(filename):
 	allT = importTrajectory(filename)
-	for a in allT:
-		tra = allT[0]
+	for a in allT.keys():
+		tra = allT[a]
 		q_all = []
 		for t in tra:
 			config = fullBody.getCurrentConfig()

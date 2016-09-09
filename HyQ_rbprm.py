@@ -1,4 +1,6 @@
-#tests completed!
+# gepetto-viewer-server
+# not hpp-manipulation-server
+# hppcorbaserver
 
 from Agent import *
 from Platform import *
@@ -43,14 +45,43 @@ q_goal[2] = 0
 q_goal[3] = -1
 a3 = Agent(r3, q_init, q_goal)
 
+# # agent 4
+
+r4 = HyQ('uncle')
+r4.setInit(-7,2)
+q_init = r4.getCurrentConfig()
+q_goal = q_init[::]
+q_goal[0] = 3
+q_goal[1] = 4
+q_goal[2] = 0
+q_goal[3] = -1
+a4 = Agent(r4, q_init, q_goal)
+
+
+# # agent 5
+
+r5 = HyQ('aunty')
+r5.setInit(9, 2)
+q_init = r5.getCurrentConfig()
+q_goal = q_init[::]
+q_goal[0] = -18
+q_goal[1] = -1.7
+q_goal[2] = 0 
+q_goal[3] = -1
+a5 = Agent(r5, q_init, q_goal)
+
+
 # platform
-pl = Platform([a1, a2, a3])
+pl = Platform([a1, a2, a3, a4, a5])
+
+
 air = Airplane("air")
 pl.setEnvironment(air)
 
 pl.start()
 pl.r.client.gui.addLight('0_scene_hpp_/x', pl.r.windowId,0.1, [1,1,1,1])
 pl.r.client.gui.applyConfiguration('0_scene_hpp_/x', [-3,0,7,1,0,0,0])
+pl.r.client.gui.setColor('air', [1,1,1,0.5])
 pl.r.client.gui.refresh()
 
 
@@ -62,6 +93,8 @@ print 'start the searching with ', pl.tree.getAgentsRemained(), ' remained'
 a1.setPermittedPlan(plans[0])
 a2.setPermittedPlan(plans[1])
 a3.setPermittedPlan(plans[2])
+a3.setPermittedPlan(plans[3])
+a3.setPermittedPlan(plans[4])
 
 
 # pl.playAllPermittedPath()
@@ -70,6 +103,8 @@ filename = 'allPath.path'
 a1.exportPermittedPlan(filename)
 a2.exportPermittedPlan(filename)
 a3.exportPermittedPlan(filename)
+a4.exportPermittedPlan(filename)
+a5.exportPermittedPlan(filename)
 
 
 # a1.startDefaultSolver()

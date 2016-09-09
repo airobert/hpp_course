@@ -152,7 +152,7 @@ class Agent (Client):
 				print self.robot.name, ' is now loading ', a.robot.name, ' as a ghost', 'it is at ', spec [0], spec [1]
 
 	def setBounds(self):
-		self.robot.setJointBounds ("base_joint_xy", [-35,10, -4, 4])
+		self.robot.setJointBounds ("base_joint_xy", [-35,10, -2.6, 4.3])
 
 		# if self.platform.env != None:
 		# 	if ('Environment.Kitchen' in str(type(self.platform.env))):

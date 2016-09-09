@@ -21,7 +21,7 @@ class HyQ (Robot):
 		self.init_config[6] = -0.5
 		self.init_config[9] = 0.5
 		self.init_config[12] = -0.5
-		self.init_config[15] = 0.
+		self.init_config[15] = 0.5
 		self.setCurrentConfig(self.init_config)
 		# self.platform.r(self.init_config)
 		# error message
